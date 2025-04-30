@@ -1,0 +1,26 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.home, name='home'),
+    path('shorts/', views.shorts, name='shorts'),
+    path('video/<int:pk>/', views.VideoDetailView.as_view(), name='video-detail'),
+    path('video/new/', views.VideoCreateView.as_view(), name='video-create'),
+    path('video/<int:pk>/update/', views.VideoUpdateView.as_view(), name='video-update'),
+    path('video/<int:pk>/delete/', views.VideoDeleteView.as_view(), name='video-delete'),
+    path('video/<int:pk>/like/', views.like_video, name='video-like'),
+    path('video/<int:pk>/comments/', views.get_video_comments, name='get_video_comments'),
+    path('video/<int:pk>/add_comment/', views.add_comment, name='add_comment'),
+    path('video/<int:pk>/comment/', views.add_comment, name='add_comment_alt'),
+    path('comment/<int:pk>/like/', views.like_comment, name='comment-like'),
+    path('comment/<int:pk>/dislike/', views.dislike_comment, name='comment-dislike'),
+    path('comment/<int:pk>/reply/', views.reply_comment, name='comment-reply'),
+    path('user/<str:username>/', views.user_dashboard, name='user_dashboard'),
+    path('user/<str:username>/subscribe/', views.subscribe, name='subscribe'),
+    path('notifications/', views.get_notifications, name='get_notifications'),
+    path('notifications/<int:pk>/read/', views.mark_notification_read, name='mark_notification_read'),
+    path('notifications/read-all/', views.mark_all_notifications_read, name='mark_all_notifications_read'),
+    path('video/<int:pk>/report/', views.report_video, name='report-video'),
+    path('admin/reports/', views.manage_reports, name='manage-reports'),
+    path('admin/reports/<int:pk>/handle/', views.handle_report, name='handle-report'),
+] 

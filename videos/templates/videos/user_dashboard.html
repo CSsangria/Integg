@@ -1,0 +1,112 @@
+{% extends 'videos/base.html' %}
+
+{% block title %}{{ profile_user.username }}'s Videos - VideoShare{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- User Profile Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <img src="{{ profile_user.userprofile.profile_picture.url }}" 
+                             alt="{{ profile_user.username }}'s profile picture"
+                             class="rounded-circle me-4"
+                             style="width: 100px; height: 100px; object-fit: cover;">
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h1 class="mb-2">{{ profile_user.username }}</h1>
+                                    <p class="text-muted mb-2">
+                                        <span class="me-3">{{ profile_user.subscribers.count }} subscribers</span>
+                                        <span>{{ videos.count }} videos</span>
+                                    </p>
+                                    <p class="text-muted mb-0">Joined {{ profile_user.date_joined|date:"F Y" }}</p>
+                                </div>
+                                {% if user.is_authenticated and user != profile_user %}
+                                <div>
+                                    <button class="btn {% if is_subscribed %}btn-secondary{% else %}btn-primary{% endif %} subscribe-button" 
+                                            data-username="{{ profile_user.username }}">
+                                        {% if is_subscribed %}
+                                            Unsubscribe
+                                        {% else %}
+                                            Subscribe
+                                        {% endif %}
+                                    </button>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User's Videos -->
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">Videos</h2>
+        </div>
+        {% for video in videos %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <a href="{% url 'video-detail' video.pk %}" class="text-decoration-none">
+                    {% if video.thumbnail %}
+                    <img src="{{ video.thumbnail.url }}" class="card-img-top" alt="{{ video.title }}" style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title text-dark">{{ video.title }}</h5>
+                        <p class="card-text text-muted">
+                            <small>
+                                {{ video.views }} views • 
+                                {{ video.date_posted|date:"F d, Y" }}
+                            </small>
+                        </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-muted">No videos uploaded yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const subscribeButton = document.querySelector('.subscribe-button');
+    if (subscribeButton) {
+        subscribeButton.addEventListener('click', function() {
+            const username = this.dataset.username;
+            fetch(`/user/${username}/subscribe/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.subscribed) {
+                    this.textContent = 'Unsubscribe';
+                    this.classList.remove('btn-primary');
+                    this.classList.add('btn-secondary');
+                } else {
+                    this.textContent = 'Subscribe';
+                    this.classList.remove('btn-secondary');
+                    this.classList.add('btn-primary');
+                }
+                // Update subscriber count
+                const subscriberCount = document.querySelector('.text-muted span:first-child');
+                subscriberCount.textContent = `${data.subscriber_count} subscribers`;
+            });
+        });
+    }
+});
+</script>
+{% endblock %} 

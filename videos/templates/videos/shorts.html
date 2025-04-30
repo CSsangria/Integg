@@ -1,0 +1,784 @@
+{% extends 'videos/base.html' %}
+{% load static %}
+
+{% block title %}PiliPili - Shorts{% endblock %}
+
+{% block styles %}
+<style>
+    .shorts-page {
+        position: fixed;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 70px);
+        background: black;
+        z-index: 998;
+    }
+
+    .shorts-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow-y: scroll;
+        scroll-snap-type: y mandatory;
+        padding-bottom: 0;
+    }
+
+    .short-video-card {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: black;
+    }
+
+    .video-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: black;
+    }
+
+    .video-wrapper {
+        position: relative;
+        height: 100%;
+        aspect-ratio: 9/16;
+        background: black;
+    }
+
+    .black-bars {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        justify-content: center;
+        background: black;
+    }
+
+    .black-bar {
+        background: black;
+        height: 100%;
+        flex: 1;
+    }
+
+    .video-content {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        height: 100%;
+        aspect-ratio: 9/16;
+    }
+
+    .short-video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .video-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 20px;
+        background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        color: white;
+        z-index: 2;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    .video-info {
+        flex: 1;
+        margin-right: 20px;
+        padding-bottom: 10px;
+    }
+
+    .video-description {
+        font-size: 16px;
+        margin: 0 0 8px 0;
+        color: #fff;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .author-link {
+        color: #fff;
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .video-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+        padding-bottom: 10px;
+    }
+
+    .action-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        background: transparent;
+        border: none;
+        color: white;
+        cursor: pointer;
+        min-width: 45px;
+    }
+
+    .action-btn i {
+        font-size: 24px;
+        filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+    }
+
+    .action-btn .count {
+        font-size: 13px;
+        font-weight: 600;
+        opacity: 0.9;
+    }
+
+    .action-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .action-btn.active {
+        color: var(--primary-color);
+    }
+
+    /* Comments Section */
+    .comments-section {
+        position: fixed;
+        top: 70px;
+        right: -400px;
+        width: 400px;
+        height: calc(100vh - 70px);
+        background: white;
+        z-index: 999;
+        transition: right 0.3s ease-in-out;
+        display: flex;
+        flex-direction: column;
+        border-left: 1px solid #e5e5e5;
+    }
+
+    .comments-section.active {
+        right: 0;
+    }
+
+    .comments-header {
+        padding: 16px;
+        border-bottom: 1px solid #e5e5e5;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .comments-header h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    .close-comments {
+        background: transparent;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 0;
+        color: #606060;
+    }
+
+    .comments-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+    }
+
+    .comment-form {
+        padding: 16px;
+        border-top: 1px solid #e5e5e5;
+    }
+
+    .comment-input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #e5e5e5;
+        border-radius: 4px;
+        resize: none;
+        margin-bottom: 8px;
+    }
+
+    .comment-item {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    .comment-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .comment-content {
+        flex: 1;
+    }
+
+    .comment-author {
+        font-weight: 500;
+        margin-bottom: 4px;
+        font-size: 14px;
+    }
+
+    .comment-text {
+        color: #0f0f0f;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .comment-metadata {
+        font-size: 12px;
+        color: #606060;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .comment-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 8px;
+    }
+
+    .action-link {
+        background: none;
+        border: none;
+        color: #606060;
+        font-size: 13px;
+        cursor: pointer;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .action-link:hover {
+        color: #0f0f0f;
+    }
+
+    .action-link.active {
+        color: var(--primary-color);
+    }
+
+    .reply-form {
+        margin-top: 12px;
+        margin-left: 52px;
+        display: none;
+    }
+
+    .reply-input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #e5e5e5;
+        border-radius: 4px;
+        resize: none;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .replies-container {
+        margin-left: 52px;
+        margin-top: 12px;
+    }
+
+    .reply-item {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    /* Hide scrollbar */
+    .shorts-container::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .shorts-container {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    /* Hide footer in shorts view */
+    .footer {
+        display: none !important;
+    }
+
+    .no-shorts {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: white;
+    }
+
+    .no-shorts i {
+        font-size: 48px;
+        color: var(--primary-color);
+        margin-bottom: 16px;
+    }
+
+    #page-container {
+        padding-bottom: 0 !important;
+    }
+
+    .container {
+        padding-bottom: 0 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="shorts-page">
+    <div class="shorts-container">
+        {% if videos %}
+            {% for video in videos %}
+                <div class="short-video-card" data-video-id="{{ video.id }}">
+                    <div class="video-container">
+                        <div class="black-bars">
+                            <div class="black-bar"></div>
+                            <div class="video-content">
+                                <video 
+                                    src="{{ video.video_file.url }}"
+                                    poster="{{ video.thumbnail.url }}"
+                                    loop
+                                    muted
+                                    playsinline
+                                    preload="auto"
+                                    class="short-video">
+                                </video>
+                                <div class="video-overlay">
+                                    <div class="video-info">
+                                        <p class="video-description">{{ video.description }}</p>
+                                        <a href="{% url 'user_dashboard' video.author.username %}" class="author-link">
+                                            @{{ video.author.username }}
+                                        </a>
+                                    </div>
+                                    <div class="video-actions">
+                                        <button class="action-btn like-btn {% if request.user in video.likes.all %}active{% endif %}" data-video-id="{{ video.id }}">
+                                            <i class="bi bi-heart-fill"></i>
+                                            <span class="count">{{ video.total_likes }}</span>
+                                        </button>
+                                        <button class="action-btn comment-btn" data-video-id="{{ video.id }}">
+                                            <i class="bi bi-chat-fill"></i>
+                                            <span class="count">{{ video.comments.count }}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="black-bar"></div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-shorts">
+                <i class="bi bi-camera-video"></i>
+                <h2>No Shorts Available</h2>
+                <p>Be the first to upload a portrait video!</p>
+                <a href="{% url 'video-create' %}" class="btn btn-primary">Upload Video</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Comments Section -->
+<div class="comments-section">
+    <div class="comments-header">
+        <h3>Comments</h3>
+        <button class="close-comments">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+    <div class="comments-container">
+        <!-- Comments will be loaded here dynamically -->
+    </div>
+    {% if user.is_authenticated %}
+    <div class="comment-form">
+        <textarea class="comment-input" placeholder="Add a comment..."></textarea>
+        <button class="btn btn-primary btn-sm post-comment-btn">Comment</button>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const videos = document.querySelectorAll('.short-video');
+    const shortsContainer = document.querySelector('.shorts-container');
+    const commentsSection = document.querySelector('.comments-section');
+    const closeCommentsBtn = document.querySelector('.close-comments');
+    let currentVideoIndex = 0;
+    
+    // Function to play a video
+    function playVideo(video) {
+        video.play().catch(error => {
+            console.log("Auto-play prevented:", error);
+        });
+    }
+    
+    // Function to pause a video
+    function pauseVideo(video) {
+        video.pause();
+    }
+
+    // Play the first video immediately
+    if (videos.length > 0) {
+        playVideo(videos[0]);
+    }
+
+    // Create an Intersection Observer to handle video playback
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            const video = entry.target;
+            if (entry.isIntersecting) {
+                playVideo(video);
+            } else {
+                pauseVideo(video);
+            }
+        });
+    }, {
+        threshold: 0.8
+    });
+
+    // Observe all videos
+    videos.forEach(video => {
+        observer.observe(video);
+    });
+
+    // Handle video click to toggle sound
+    videos.forEach(video => {
+        video.addEventListener('click', () => {
+            video.muted = !video.muted;
+        });
+    });
+
+    // Handle likes
+    const likeBtns = document.querySelectorAll('.like-btn');
+    likeBtns.forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const videoId = btn.dataset.videoId;
+            try {
+                const response = await fetch(`/video/${videoId}/like/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+                const data = await response.json();
+                if (data.liked) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+                btn.querySelector('.count').textContent = data.total_likes;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    });
+
+    // Handle comments section
+    const commentBtns = document.querySelectorAll('.comment-btn');
+    const commentForm = document.querySelector('.comment-form');
+    const commentInput = document.querySelector('.comment-input');
+    const postCommentBtn = document.querySelector('.post-comment-btn');
+    let currentVideoId = null;
+
+    function formatTimestamp(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+        
+        if (diffInSeconds < 60) return 'Just now';
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+        if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+        if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)} months ago`;
+        return `${Math.floor(diffInSeconds / 31536000)} years ago`;
+    }
+
+    function createCommentHTML(comment) {
+        const repliesHTML = comment.replies ? comment.replies.map(reply => `
+            <div class="reply-item">
+                <img src="${reply.author_profile_picture || '/static/images/default-avatar.png'}" 
+                     alt="${reply.author}" 
+                     class="comment-avatar">
+                <div class="comment-content">
+                    <div class="comment-author">@${reply.author}</div>
+                    <div class="comment-text">${reply.content}</div>
+                    <div class="comment-metadata">
+                        ${formatTimestamp(reply.date_posted)}
+                        <div class="comment-actions">
+                            <button class="action-link like-comment ${reply.is_liked ? 'active' : ''}" data-comment-id="${reply.id}">
+                                <i class="bi bi-hand-thumbs-up${reply.is_liked ? '-fill' : ''}"></i>
+                                <span class="like-count">${reply.likes_count || 0}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('') : '';
+
+        return `
+            <div class="comment-item" data-comment-id="${comment.id}">
+                <img src="${comment.author_profile_picture || '/static/images/default-avatar.png'}" 
+                     alt="${comment.author}" 
+                     class="comment-avatar">
+                <div class="comment-content">
+                    <div class="comment-author">@${comment.author}</div>
+                    <div class="comment-text">${comment.content}</div>
+                    <div class="comment-metadata">
+                        ${formatTimestamp(comment.date_posted)}
+                        <div class="comment-actions">
+                            <button class="action-link like-comment ${comment.is_liked ? 'active' : ''}" data-comment-id="${comment.id}">
+                                <i class="bi bi-hand-thumbs-up${comment.is_liked ? '-fill' : ''}"></i>
+                                <span class="like-count">${comment.likes_count || 0}</span>
+                            </button>
+                            <button class="action-link reply-btn" data-comment-id="${comment.id}">
+                                <i class="bi bi-reply"></i>
+                                Reply
+                            </button>
+                        </div>
+                    </div>
+                    <div class="reply-form" id="reply-form-${comment.id}">
+                        <textarea class="reply-input" placeholder="Write a reply..."></textarea>
+                        <button class="btn btn-primary btn-sm post-reply-btn">Reply</button>
+                        <button class="btn btn-light btn-sm cancel-reply-btn">Cancel</button>
+                    </div>
+                    <div class="replies-container" id="replies-${comment.id}">
+                        ${repliesHTML}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    async function loadComments(videoId) {
+        try {
+            const response = await fetch(`/video/${videoId}/comments/`);
+            if (!response.ok) throw new Error('Failed to load comments');
+            const data = await response.json();
+            
+            const commentsContainer = document.querySelector('.comments-container');
+            commentsContainer.innerHTML = data.comments.length ? 
+                data.comments.map(comment => createCommentHTML(comment)).join('') :
+                '<p class="text-center text-muted mt-4">No comments yet. Be the first to comment!</p>';
+            
+            // Update comment count in the video actions
+            const commentBtn = document.querySelector(`.comment-btn[data-video-id="${videoId}"] .count`);
+            if (commentBtn) commentBtn.textContent = data.comments.length;
+            
+            // Add event listeners to new comment buttons
+            attachCommentEventListeners();
+        } catch (error) {
+            console.error('Error loading comments:', error);
+        }
+    }
+
+    function attachCommentEventListeners() {
+        // Like buttons for comments
+        document.querySelectorAll('.like-comment').forEach(btn => {
+            btn.onclick = async (e) => {
+                e.preventDefault();
+                const commentId = btn.dataset.commentId;
+                try {
+                    const response = await fetch(`/comment/${commentId}/like/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        }
+                    });
+                    const data = await response.json();
+                    const icon = btn.querySelector('i');
+                    const count = btn.querySelector('.like-count');
+                    
+                    if (data.liked) {
+                        icon.classList.remove('bi-hand-thumbs-up');
+                        icon.classList.add('bi-hand-thumbs-up-fill');
+                    } else {
+                        icon.classList.remove('bi-hand-thumbs-up-fill');
+                        icon.classList.add('bi-hand-thumbs-up');
+                    }
+                    count.textContent = data.likes;
+                } catch (error) {
+                    console.error('Error liking comment:', error);
+                }
+            };
+        });
+    }
+
+    commentBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentVideoId = btn.dataset.videoId;
+            commentsSection.classList.add('active');
+            loadComments(currentVideoId);
+        });
+    });
+
+    // Handle comment submission
+    if (postCommentBtn) {
+        postCommentBtn.addEventListener('click', async () => {
+            if (!commentInput.value.trim() || !currentVideoId) return;
+
+            try {
+                const response = await fetch(`/video/${currentVideoId}/comment/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        content: commentInput.value.trim()
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to post comment');
+                const data = await response.json();
+
+                // Add the new comment to the top of the comments container
+                const commentsContainer = document.querySelector('.comments-container');
+                const newCommentHTML = createCommentHTML(data.comment);
+                commentsContainer.insertAdjacentHTML('afterbegin', newCommentHTML);
+
+                // Update comment count
+                const commentBtn = document.querySelector(`.comment-btn[data-video-id="${currentVideoId}"] .count`);
+                if (commentBtn) {
+                    commentBtn.textContent = parseInt(commentBtn.textContent || 0) + 1;
+                }
+
+                // Clear input
+                commentInput.value = '';
+                
+                // Reattach event listeners
+                attachCommentEventListeners();
+            } catch (error) {
+                console.error('Error posting comment:', error);
+            }
+        });
+    }
+
+    // Close comments section
+    closeCommentsBtn.addEventListener('click', () => {
+        commentsSection.classList.remove('active');
+        currentVideoId = null;
+    });
+
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Add this after the postCommentBtn event listener
+    document.addEventListener('click', async (e) => {
+        // Reply button click handler
+        if (e.target.closest('.reply-btn')) {
+            const btn = e.target.closest('.reply-btn');
+            const commentId = btn.dataset.commentId;
+            const replyForm = document.querySelector(`#reply-form-${commentId}`);
+            replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Cancel reply button click handler
+        if (e.target.closest('.cancel-reply-btn')) {
+            const btn = e.target.closest('.cancel-reply-btn');
+            const replyForm = btn.closest('.reply-form');
+            replyForm.style.display = 'none';
+        }
+
+        // Post reply button click handler
+        if (e.target.closest('.post-reply-btn')) {
+            const btn = e.target.closest('.post-reply-btn');
+            const replyForm = btn.closest('.reply-form');
+            const commentId = replyForm.id.replace('reply-form-', '');
+            const replyInput = replyForm.querySelector('.reply-input');
+            const content = replyInput.value.trim();
+
+            if (!content) return;
+
+            try {
+                const response = await fetch(`/comment/${commentId}/reply/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ content })
+                });
+
+                if (!response.ok) throw new Error('Failed to post reply');
+                const data = await response.json();
+
+                if (data.success) {
+                    const repliesContainer = document.querySelector(`#replies-${commentId}`);
+                    const replyHTML = `
+                        <div class="reply-item">
+                            <img src="${data.reply.author_profile_picture}" 
+                                 alt="${data.reply.author}" 
+                                 class="comment-avatar">
+                            <div class="comment-content">
+                                <div class="comment-author">@${data.reply.author}</div>
+                                <div class="comment-text">${data.reply.content}</div>
+                                <div class="comment-metadata">
+                                    Just now
+                                    <div class="comment-actions">
+                                        <button class="action-link like-comment" data-comment-id="${data.reply.id}">
+                                            <i class="bi bi-hand-thumbs-up"></i>
+                                            <span class="like-count">0</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    repliesContainer.insertAdjacentHTML('afterbegin', replyHTML);
+                    replyInput.value = '';
+                    replyForm.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error posting reply:', error);
+            }
+        }
+    });
+});
+</script>
+{% endblock %} 

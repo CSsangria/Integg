@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Review Report</h3>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h5>Report Details</h5>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <tr>
+                                    <th>Video:</th>
+                                    <td>
+                                        <a href="{% url 'video-detail' report.video.pk %}" class="text-decoration-none">
+                                            {{ report.video.title }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Reported by:</th>
+                                    <td>{{ report.reporter.username }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Reason:</th>
+                                    <td>{{ report.get_reason_display }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Date Reported:</th>
+                                    <td>{{ report.created_at|date:"M d, Y H:i" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Description:</th>
+                                    <td>{{ report.description|default:"No additional details provided" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Video Preview</h5>
+                        <div class="ratio ratio-16x9">
+                            <video controls>
+                                <source src="{{ report.video.video_file.url }}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    </div>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" name="action" value="dismiss" class="btn btn-secondary">
+                                Dismiss Report
+                            </button>
+                            <button type="submit" name="action" value="delete" class="btn btn-danger">
+                                Delete Video
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.2, maximum-scale=1.2, user-scalable=no">
+    <title>{% block title %}PiliPili{% endblock %}</title>
+    {% block extra_head %}{% endblock %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #fb7299;
+            --secondary-color: #f4f4f5;
+            --dark-color: #18191c;
+            --text-color: #18191c;
+            --light-text: #9499a0;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-color: var(--secondary-color);
+        }
+
+        #page-container {
+            transform: scale(0.83);
+            transform-origin: top left;
+            width: 120.48%;
+            min-height: 120.48vh;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            position: relative;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+        }
+
+        .navbar {
+            background-color: white !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 0.3rem 0;
+            min-height: 50px;
+        }
+
+        .navbar-brand {
+            color: var(--primary-color) !important;
+            font-weight: bold;
+            font-size: 2.8rem;
+            margin-right: 3rem;
+            line-height: 1;
+        }
+
+        .search-container {
+            flex-grow: 1;
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-form {
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.6rem 1.25rem;
+            border: 1px solid #e5e5e5;
+            border-radius: 25px;
+            background-color: var(--secondary-color);
+            font-size: 1.2rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background-color: white;
+        }
+
+        .search-button {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--light-text);
+            cursor: pointer;
+            font-size: 1.4rem;
+        }
+
+        .search-button:hover {
+            color: var(--primary-color);
+        }
+
+        .profile-section {
+            margin-left: auto;
+            padding-left: 2rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+        }
+
+        .btn-primary:hover {
+            background-color: #e65c85 !important;
+            border-color: #e65c85 !important;
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .video-card {
+            transition: transform 0.2s;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .video-info {
+            padding: 1rem;
+        }
+
+        .video-title {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-meta {
+            font-size: 0.875rem;
+            color: var(--light-text);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+            position: relative;
+            padding-left: 1rem;
+        }
+
+        .section-title::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 1.5rem;
+            background-color: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        .nav-link {
+            color: var(--text-color) !important;
+            font-size: 1.3rem;
+            padding: 0.4rem 1rem;
+        }
+
+        .nav-link img {
+            width: 40px !important;
+            height: 40px !important;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100vw;
+            background-color: white;
+            padding: 1rem 0;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transform: none !important;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .footer-nav a {
+            color: var(--light-text);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.875rem;
+        }
+
+        .footer-nav a i {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .footer-nav a:hover {
+            color: var(--primary-color);
+        }
+
+        .circular-button {
+            position: absolute;
+            left: 50%;
+            top: -30px;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+
+        .circular-button i {
+            font-size: 3.5rem;
+            color: black;
+            line-height: 0;
+            margin-bottom: -4px;
+        }
+
+        .circular-button:hover {
+            transform: translateX(-50%) scale(1.1);
+        }
+
+        .container {
+            padding-bottom: 80px;
+        }
+
+        /* Notification Dropdown Styles */
+        .notification-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .notification-trigger {
+            color: var(--light-text);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.875rem;
+            position: relative;
+        }
+
+        .notification-trigger i {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .notification-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .notification-dropdown-content {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 15px);
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: white;
+            min-width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            z-index: 1000;
+        }
+
+        .notification-dropdown.show .notification-dropdown-content {
+            display: block;
+        }
+
+        .notification-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .notification-header h6 {
+            margin: 0;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .mark-all-read {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 0.875rem;
+            padding: 4px 8px;
+        }
+
+        .mark-all-read:hover {
+            text-decoration: underline;
+        }
+
+        .notification-list {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .notification-item {
+            padding: 12px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-bottom: 1px solid #eee;
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .notification-item.unread {
+            background-color: #f0f7ff;
+        }
+
+        .notification-item.unread:hover {
+            background-color: #e5f1ff;
+        }
+
+        .notification-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-content p {
+            margin: 0 0 4px 0;
+            font-size: 0.875rem;
+            line-height: 1.4;
+            color: var(--text-color);
+        }
+
+        .notification-content small {
+            color: var(--light-text);
+            font-size: 0.75rem;
+        }
+
+        .no-notifications {
+            padding: 24px 16px;
+            text-align: center;
+            color: var(--light-text);
+            font-size: 0.875rem;
+        }
+    </style>
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <div id="page-container">
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'home' %}">PiliPili</a>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <div class="search-container">
+                        <form class="search-form" action="#" method="GET">
+                            <input type="search" class="search-input" placeholder="Search videos..." name="q">
+                            <button type="submit" class="search-button">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="profile-section">
+                        <ul class="navbar-nav">
+                            {% if user.is_authenticated %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img src="{{ user.userprofile.profile_picture.url }}" class="rounded-circle me-2" style="width: 38px; height: 38px; object-fit: cover;" alt="Profile Picture">
+                                    {{ user.username }}
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    <li><a class="dropdown-item" href="{% url 'profile' %}">User Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'settings' %}">Settings</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="post" action="{% url 'logout' %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="dropdown-item">Logout</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                            {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'login' %}">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'register' %}">Register</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container mt-4">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <footer class="footer">
+        <nav class="footer-nav">
+            <a href="{% url 'home' %}">
+                <i class="bi bi-house"></i>
+                <span>Home</span>
+            </a>
+            <a href="{% url 'shorts' %}">
+                <i class="bi bi-camera-reels"></i>
+                <span>Shorts</span>
+            </a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'video-create' %}" class="circular-button">
+                <i class="bi bi-cloud-upload"></i>
+            </a>
+            {% else %}
+            <a href="{% url 'login' %}" class="circular-button">
+                <i class="bi bi-cloud-upload"></i>
+            </a>
+            {% endif %}
+            {% if user.is_authenticated %}
+            <div class="notification-dropdown">
+                <div class="notification-overlay"></div>
+                <a href="#" class="notification-trigger">
+                    <i class="bi bi-bell"></i>
+                    <span class="notification-count" style="display: none;">0</span>
+                    <span>Notifications</span>
+                </a>
+                <div class="notification-dropdown-content">
+                    <div class="notification-header">
+                        <h6>Notifications</h6>
+                        <button type="button" class="mark-all-read">Mark all as read</button>
+                    </div>
+                    <div class="notification-list">
+                        <!-- Notifications will be populated here -->
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <a href="{% url 'login' %}">
+                <i class="bi bi-bell"></i>
+                <span>Notifications</span>
+            </a>
+            {% endif %}
+            <a href="{% url 'profile' %}">
+                <i class="bi bi-person"></i>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Notification handling
+        document.addEventListener('DOMContentLoaded', function() {
+            const notificationTrigger = document.querySelector('.notification-trigger');
+            const notificationDropdown = document.querySelector('.notification-dropdown');
+            const notificationOverlay = document.querySelector('.notification-overlay');
+            const markAllReadButton = document.querySelector('.mark-all-read');
+
+            function toggleNotifications(event) {
+                event.preventDefault();
+                notificationDropdown.classList.toggle('show');
+                fetchNotifications(); // Fetch latest notifications when opening
+            }
+
+            function closeNotifications() {
+                notificationDropdown.classList.remove('show');
+            }
+
+            // Event listeners
+            if (notificationTrigger) {
+                notificationTrigger.addEventListener('click', toggleNotifications);
+            }
+
+            if (notificationOverlay) {
+                notificationOverlay.addEventListener('click', closeNotifications);
+            }
+
+            if (markAllReadButton) {
+                markAllReadButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    markAllNotificationsRead();
+                });
+            }
+
+            // Close on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeNotifications();
+                }
+            });
+
+            function fetchNotifications() {
+                console.log('Fetching notifications...');
+                fetch('/notifications/')
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Received notifications:', data);
+                        const notificationList = document.querySelector('.notification-list');
+                        const notificationCount = document.querySelector('.notification-count');
+                        
+                        if (!notificationList || !notificationCount) {
+                            console.error('Notification elements not found');
+                            return;
+                        }
+
+                        // Update notification count
+                        const unreadCount = data.notifications.filter(n => !n.is_read).length;
+                        console.log('Unread notifications:', unreadCount);
+                        notificationCount.textContent = unreadCount;
+                        notificationCount.style.display = unreadCount > 0 ? 'block' : 'none';
+
+                        // Update notification list
+                        if (data.notifications.length === 0) {
+                            notificationList.innerHTML = '<div class="no-notifications">No notifications yet</div>';
+                        } else {
+                            notificationList.innerHTML = data.notifications.map(notification => {
+                                console.log('Processing notification:', notification);
+                                return `
+                                    <div class="notification-item ${notification.is_read ? '' : 'unread'}" 
+                                         data-id="${notification.id}"
+                                         data-type="${notification.type}"
+                                         data-video-id="${notification.video_id || ''}"
+                                         data-comment-id="${notification.comment_id || ''}">
+                                        <img src="${notification.sender.profile_picture || '/static/default_profile.png'}" 
+                                             alt="${notification.sender.username}" 
+                                             class="notification-avatar">
+                                        <div class="notification-content">
+                                            <p>${notification.content}</p>
+                                            <small>${notification.created_at}</small>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('');
+
+                            // Add click handlers for notifications
+                            document.querySelectorAll('.notification-item').forEach(item => {
+                                item.addEventListener('click', function(e) {
+                                    e.stopPropagation();
+                                    const notificationId = this.dataset.id;
+                                    const videoId = this.dataset.videoId;
+                                    const commentId = this.dataset.commentId;
+                                    console.log('Clicked notification:', { notificationId, videoId, commentId });
+                                    
+                                    markNotificationRead(notificationId);
+                                    
+                                    if (videoId) {
+                                        let url = `/video/${videoId}/`;
+                                        if (commentId) {
+                                            url += `#comment-${commentId}`;
+                                        }
+                                        window.location.href = url;
+                                    }
+                                });
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching notifications:', error);
+                    });
+            }
+
+            function markNotificationRead(notificationId) {
+                console.log('Marking notification as read:', notificationId);
+                fetch(`/notifications/${notificationId}/read/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => {
+                    console.log('Mark as read response:', response.status);
+                    if (response.ok) {
+                        fetchNotifications();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error marking notification as read:', error);
+                });
+            }
+
+            function markAllNotificationsRead() {
+                console.log('Marking all notifications as read');
+                fetch('/notifications/read-all/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => {
+                    console.log('Mark all as read response:', response.status);
+                    if (response.ok) {
+                        fetchNotifications();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error marking all notifications as read:', error);
+                });
+            }
+
+            // Helper function to get CSRF token
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            // Initial fetch
+            fetchNotifications();
+            
+            // Fetch notifications every 30 seconds
+            setInterval(fetchNotifications, 30000);
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

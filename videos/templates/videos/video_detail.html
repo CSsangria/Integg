@@ -1,0 +1,438 @@
+{% extends 'videos/base.html' %}
+
+{% block title %}{{ video.title }} - VideoShare{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <video class="card-img-top" controls>
+                <source src="{{ video.video_file.url }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div class="card-body">
+                <h1 class="card-title">{{ video.title }}</h1>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex align-items-center">
+                        <a href="{% url 'user_dashboard' video.author.username %}" class="text-decoration-none">
+                            <img src="{{ video.author.userprofile.profile_picture.url }}" 
+                                 alt="{{ video.author.username }}'s profile picture"
+                                 class="rounded-circle me-2"
+                                 style="width: 48px; height: 48px; object-fit: cover;">
+                        </a>
+                        <div>
+                            <a href="{% url 'user_dashboard' video.author.username %}" class="text-decoration-none">
+                                <strong class="d-block text-dark">{{ video.author.username }}</strong>
+                            </a>
+                            <span class="text-muted">{{ video.date_posted|date:"F d, Y" }}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline-danger like-button" data-video-id="{{ video.pk }}">
+                            <i class="bi bi-heart{% if user in video.likes.all %}-fill{% endif %}"></i>
+                            <span class="like-count">{{ video.total_likes }}</span>
+                        </button>
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'report-video' video.pk %}" class="btn btn-outline-danger">
+                                <i class="bi bi-flag"></i>
+                                Report
+                            </a>
+                        {% endif %}
+                        {% if user == video.author %}
+                            <a href="{% url 'video-update' video.pk %}" class="btn btn-outline-primary">Edit</a>
+                            <a href="{% url 'video-delete' video.pk %}" class="btn btn-outline-danger">Delete</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <p class="card-text">{{ video.description }}</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Comments</h5>
+            </div>
+            <div class="card-body">
+                {% if user.is_authenticated %}
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ comment_form.as_p }}
+                    <button type="submit" class="btn btn-primary">Post Comment</button>
+                </form>
+                <hr>
+                {% endif %}
+                
+                {% for comment in video.comments.all %}
+                    {% if not comment.is_reply %}  {# Only show top-level comments #}
+                        <div class="mb-3 comment-container" data-comment-id="{{ comment.pk }}">
+                            <div class="d-flex">
+                                <!-- Profile Picture -->
+                                <div class="me-3">
+                                    <img src="{{ comment.author.userprofile.profile_picture.url }}" 
+                                         alt="{{ comment.author.username }}'s profile picture"
+                                         class="rounded-circle"
+                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                </div>
+                                <!-- Comment Content -->
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>{{ comment.author.username }}</strong>
+                                        <small class="text-muted">{{ comment.date_posted|date:"F d, Y" }}</small>
+                                    </div>
+                                    <p class="mb-2">{{ comment.content }}</p>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <button class="btn btn-sm btn-outline-primary like-comment" data-comment-id="{{ comment.pk }}">
+                                            <i class="bi bi-hand-thumbs-up{% if user in comment.likes.all %}-fill{% endif %}"></i>
+                                            <span class="like-count">{{ comment.likes.count }}</span>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger dislike-comment" data-comment-id="{{ comment.pk }}">
+                                            <i class="bi bi-hand-thumbs-down{% if user in comment.dislikes.all %}-fill{% endif %}"></i>
+                                            <span class="dislike-count">{{ comment.dislikes.count }}</span>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary reply-comment" data-comment-id="{{ comment.pk }}">
+                                            <i class="bi bi-reply"></i> Reply
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Reply form (hidden by default) -->
+                                    <div class="reply-form mt-2" style="display: none;">
+                                        <form class="reply-form-content">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="parent_id" value="{{ comment.pk }}">
+                                            <div class="mb-2">
+                                                <textarea name="content" class="form-control" rows="2" placeholder="Write a reply..."></textarea>
+                                            </div>
+                                            <button type="submit" class="btn btn-sm btn-primary">Post Reply</button>
+                                            <button type="button" class="btn btn-sm btn-secondary cancel-reply">Cancel</button>
+                                        </form>
+                                    </div>
+
+                                    <!-- Replies -->
+                                    <div class="replies-container">
+                                        {% with replies=comment.replies.all %}
+                                        {% with total_replies=replies|length %}
+                                        {% with hidden_replies=total_replies|add:"-3" %}
+                                            {% for reply in replies %}
+                                                <div class="reply ms-4 mt-2 {% if forloop.counter > 3 %}d-none{% endif %}" data-reply-id="{{ reply.pk }}">
+                                                    <div class="d-flex">
+                                                        <!-- Reply Profile Picture -->
+                                                        <div class="me-3">
+                                                            <img src="{{ reply.author.userprofile.profile_picture.url }}" 
+                                                                 alt="{{ reply.author.username }}'s profile picture"
+                                                                 class="rounded-circle"
+                                                                 style="width: 32px; height: 32px; object-fit: cover;">
+                                                        </div>
+                                                        <!-- Reply Content -->
+                                                        <div class="flex-grow-1">
+                                                            <div class="d-flex justify-content-between">
+                                                                <strong>{{ reply.author.username }}</strong>
+                                                                <small class="text-muted">{{ reply.date_posted|date:"F d, Y" }}</small>
+                                                            </div>
+                                                            <p class="mb-2">{{ reply.content }}</p>
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <button class="btn btn-sm btn-outline-primary like-comment" data-comment-id="{{ reply.pk }}">
+                                                                    <i class="bi bi-hand-thumbs-up{% if user in reply.likes.all %}-fill{% endif %}"></i>
+                                                                    <span class="like-count">{{ reply.likes.count }}</span>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-outline-danger dislike-comment" data-comment-id="{{ reply.pk }}">
+                                                                    <i class="bi bi-hand-thumbs-down{% if user in reply.dislikes.all %}-fill{% endif %}"></i>
+                                                                    <span class="dislike-count">{{ reply.dislikes.count }}</span>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+
+                                            {% if hidden_replies > 0 %}
+                                                <button class="btn btn-sm btn-link show-more-replies mt-2" data-comment-id="{{ comment.pk }}">
+                                                    Show {{ hidden_replies }} more repl{% if hidden_replies > 1 %}ies{% else %}y{% endif %}
+                                                </button>
+                                            {% endif %}
+                                        {% endwith %}
+                                        {% endwith %}
+                                        {% endwith %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% empty %}
+                    <p class="text-muted">No comments yet. Be the first to comment!</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Video like functionality
+    const likeButtons = document.querySelectorAll('.like-button');
+    likeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const videoId = this.dataset.videoId;
+            fetch(`/video/${videoId}/like/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const heartIcon = this.querySelector('i');
+                const likeCount = this.querySelector('.like-count');
+                
+                if (data.liked) {
+                    heartIcon.classList.remove('bi-heart');
+                    heartIcon.classList.add('bi-heart-fill');
+                } else {
+                    heartIcon.classList.remove('bi-heart-fill');
+                    heartIcon.classList.add('bi-heart');
+                }
+                
+                likeCount.textContent = data.total_likes;
+            });
+        });
+    });
+
+    // Comment like functionality
+    const likeCommentButtons = document.querySelectorAll('.like-comment');
+    likeCommentButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const commentId = this.dataset.commentId;
+            fetch(`/comment/${commentId}/like/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const thumbIcon = this.querySelector('i');
+                const likeCount = this.querySelector('.like-count');
+                
+                if (data.liked) {
+                    thumbIcon.classList.remove('bi-hand-thumbs-up');
+                    thumbIcon.classList.add('bi-hand-thumbs-up-fill');
+                } else {
+                    thumbIcon.classList.remove('bi-hand-thumbs-up-fill');
+                    thumbIcon.classList.add('bi-hand-thumbs-up');
+                }
+                
+                likeCount.textContent = data.likes;
+            });
+        });
+    });
+
+    // Comment dislike functionality
+    const dislikeCommentButtons = document.querySelectorAll('.dislike-comment');
+    dislikeCommentButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const commentId = this.dataset.commentId;
+            fetch(`/comment/${commentId}/dislike/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const thumbIcon = this.querySelector('i');
+                const dislikeCount = this.querySelector('.dislike-count');
+                
+                if (data.disliked) {
+                    thumbIcon.classList.remove('bi-hand-thumbs-down');
+                    thumbIcon.classList.add('bi-hand-thumbs-down-fill');
+                } else {
+                    thumbIcon.classList.remove('bi-hand-thumbs-down-fill');
+                    thumbIcon.classList.add('bi-hand-thumbs-down');
+                }
+                
+                dislikeCount.textContent = data.dislikes;
+            });
+        });
+    });
+
+    // Reply functionality
+    const replyButtons = document.querySelectorAll('.reply-comment');
+    replyButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const commentId = this.dataset.commentId;
+            const replyForm = this.closest('.comment-container').querySelector('.reply-form');
+            replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
+        });
+    });
+
+    // Cancel reply
+    const cancelReplyButtons = document.querySelectorAll('.cancel-reply');
+    cancelReplyButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const replyForm = this.closest('.reply-form');
+            replyForm.style.display = 'none';
+        });
+    });
+
+    // Submit reply
+    const replyForms = document.querySelectorAll('.reply-form-content');
+    replyForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const commentId = this.querySelector('[name="parent_id"]').value;
+            const content = this.querySelector('[name="content"]').value;
+            
+            fetch(`/comment/${commentId}/reply/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    content: content
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Hide the reply form
+                    this.closest('.reply-form').style.display = 'none';
+                    
+                    // Create the reply element
+                    const replyHtml = `
+                        <div class="reply ms-4 mt-2">
+                            <div class="d-flex">
+                                <!-- Reply Profile Picture -->
+                                <div class="me-3">
+                                    <img src="${data.reply.author_profile_picture}" 
+                                         alt="${data.reply.author}'s profile picture"
+                                         class="rounded-circle"
+                                         style="width: 32px; height: 32px; object-fit: cover;">
+                                </div>
+                                <!-- Reply Content -->
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>${data.reply.author}</strong>
+                                        <small class="text-muted">${data.reply.date_posted}</small>
+                                    </div>
+                                    <p class="mb-2">${data.reply.content}</p>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <button class="btn btn-sm btn-outline-primary like-comment" data-comment-id="${data.reply.id}">
+                                            <i class="bi bi-hand-thumbs-up"></i>
+                                            <span class="like-count">0</span>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger dislike-comment" data-comment-id="${data.reply.id}">
+                                            <i class="bi bi-hand-thumbs-down"></i>
+                                            <span class="dislike-count">0</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Insert the reply in the replies container
+                    const repliesContainer = this.closest('.comment-container').querySelector('.replies-container');
+                    repliesContainer.insertAdjacentHTML('beforeend', replyHtml);
+                    
+                    // Clear the textarea
+                    this.querySelector('[name="content"]').value = '';
+                    
+                    // Add event listeners to the new like/dislike buttons
+                    const newReply = repliesContainer.querySelector(`.reply:last-child`);
+                    setupCommentButtons(newReply);
+                } else {
+                    alert('Failed to post reply: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to post reply. Please try again.');
+            });
+        });
+    });
+
+    // Helper function to set up like/dislike buttons for a comment element
+    function setupCommentButtons(commentElement) {
+        const likeButton = commentElement.querySelector('.like-comment');
+        const dislikeButton = commentElement.querySelector('.dislike-comment');
+        
+        if (likeButton) {
+            likeButton.addEventListener('click', function() {
+                const commentId = this.dataset.commentId;
+                fetch(`/comment/${commentId}/like/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const thumbIcon = this.querySelector('i');
+                    const likeCount = this.querySelector('.like-count');
+                    
+                    if (data.liked) {
+                        thumbIcon.classList.remove('bi-hand-thumbs-up');
+                        thumbIcon.classList.add('bi-hand-thumbs-up-fill');
+                    } else {
+                        thumbIcon.classList.remove('bi-hand-thumbs-up-fill');
+                        thumbIcon.classList.add('bi-hand-thumbs-up');
+                    }
+                    
+                    likeCount.textContent = data.likes;
+                });
+            });
+        }
+        
+        if (dislikeButton) {
+            dislikeButton.addEventListener('click', function() {
+                const commentId = this.dataset.commentId;
+                fetch(`/comment/${commentId}/dislike/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const thumbIcon = this.querySelector('i');
+                    const dislikeCount = this.querySelector('.dislike-count');
+                    
+                    if (data.disliked) {
+                        thumbIcon.classList.remove('bi-hand-thumbs-down');
+                        thumbIcon.classList.add('bi-hand-thumbs-down-fill');
+                    } else {
+                        thumbIcon.classList.remove('bi-hand-thumbs-down-fill');
+                        thumbIcon.classList.add('bi-hand-thumbs-down');
+                    }
+                    
+                    dislikeCount.textContent = data.dislikes;
+                });
+            });
+        }
+    }
+
+    // Set up like/dislike buttons for existing comments
+    document.querySelectorAll('.comment-container, .reply').forEach(commentElement => {
+        setupCommentButtons(commentElement);
+    });
+
+    // Show more replies functionality
+    document.querySelectorAll('.show-more-replies').forEach(button => {
+        button.addEventListener('click', function() {
+            const commentId = this.dataset.commentId;
+            const repliesContainer = this.closest('.replies-container');
+            const hiddenReplies = repliesContainer.querySelectorAll('.reply.d-none');
+            
+            hiddenReplies.forEach(reply => {
+                reply.classList.remove('d-none');
+            });
+            
+            // Hide the "Show more" button
+            this.style.display = 'none';
+        });
+    });
+});
+</script>
+{% endblock %} 

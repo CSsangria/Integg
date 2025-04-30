@@ -1,0 +1,246 @@
+{% extends 'videos/base.html' %}
+
+{% block title %}Home - VideoShare{% endblock %}
+
+{% block styles %}
+<style>
+    .main-content {
+        max-width: 1754px;
+        margin: 0 auto;
+        padding: 24px;
+    }
+
+    .section-header {
+        margin-bottom: 24px;
+    }
+
+    .section-title {
+        font-size: 20px;
+        font-weight: 500;
+        color: #0f0f0f;
+    }
+
+    .video-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-bottom: 48px;
+    }
+
+    .video-item {
+        display: flex;
+        flex-direction: column;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .thumbnail-container {
+        position: relative;
+        width: 100%;
+        padding-top: 56.25%; /* 16:9 Aspect Ratio */
+        background: #f8f8f8;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 12px;
+    }
+
+    .video-thumbnail {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .video-duration {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 3px 4px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .video-info {
+        display: flex;
+        gap: 12px;
+    }
+
+    .channel-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    .video-details {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .video-title {
+        font-size: 16px;
+        font-weight: 500;
+        margin: 0 0 6px 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        color: #0f0f0f;
+        line-height: 1.4;
+    }
+
+    .video-metadata {
+        font-size: 14px;
+        color: #606060;
+        line-height: 1.5;
+    }
+
+    .channel-name {
+        margin-bottom: 2px;
+    }
+
+    .video-stats {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .video-stats::after {
+        content: "•";
+        margin: 0 4px;
+    }
+
+    .featured-section {
+        margin-bottom: 48px;
+    }
+
+    .featured-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+    }
+
+    .featured-item .thumbnail-container {
+        padding-top: 50%; /* Slightly shorter for featured videos */
+    }
+
+    .featured-item .video-title {
+        font-size: 18px;
+        -webkit-line-clamp: 1;
+    }
+
+    @media (max-width: 1600px) {
+        .video-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 1200px) {
+        .video-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .featured-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .video-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    {% if featured_video %}
+    <div class="featured-section">
+        <div class="section-header">
+            <h2 class="section-title">Featured Video</h2>
+        </div>
+        <div class="featured-grid">
+            <a href="{% url 'video-detail' featured_video.id %}" class="video-item featured-item">
+                <div class="thumbnail-container">
+                    <img src="{{ featured_video.thumbnail.url }}" class="video-thumbnail" alt="{{ featured_video.title }}">
+                    <div class="video-duration">{{ featured_video.format_duration }}</div>
+                </div>
+                <div class="video-info">
+                    <img src="{{ featured_video.author.userprofile.profile_picture.url }}" class="channel-avatar" alt="{{ featured_video.author.username }}">
+                    <div class="video-details">
+                        <h3 class="video-title">{{ featured_video.title }}</h3>
+                        <div class="video-metadata">
+                            <div class="channel-name">{{ featured_video.author.username }}</div>
+                            <div class="video-stats">
+                                {{ featured_video.views }} views
+                                <span>{{ featured_video.date_posted|timesince }} ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="section-header">
+        <h2 class="section-title">Recent Videos</h2>
+    </div>
+    <div class="video-grid">
+        {% for video in latest_videos %}
+        <a href="{% url 'video-detail' video.id %}" class="video-item">
+            <div class="thumbnail-container">
+                <img src="{{ video.thumbnail.url }}" class="video-thumbnail" alt="{{ video.title }}">
+                <div class="video-duration">{{ video.format_duration }}</div>
+            </div>
+            <div class="video-info">
+                <img src="{{ video.author.userprofile.profile_picture.url }}" class="channel-avatar" alt="{{ video.author.username }}">
+                <div class="video-details">
+                    <h3 class="video-title">{{ video.title }}</h3>
+                    <div class="video-metadata">
+                        <div class="channel-name">{{ video.author.username }}</div>
+                        <div class="video-stats">
+                            {{ video.views }} views
+                            <span>{{ video.date_posted|timesince }} ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <div class="section-header">
+        <h2 class="section-title">Popular Videos</h2>
+    </div>
+    <div class="video-grid">
+        {% for video in popular_videos %}
+        <a href="{% url 'video-detail' video.id %}" class="video-item">
+            <div class="thumbnail-container">
+                <img src="{{ video.thumbnail.url }}" class="video-thumbnail" alt="{{ video.title }}">
+                <div class="video-duration">{{ video.format_duration }}</div>
+            </div>
+            <div class="video-info">
+                <img src="{{ video.author.userprofile.profile_picture.url }}" class="channel-avatar" alt="{{ video.author.username }}">
+                <div class="video-details">
+                    <h3 class="video-title">{{ video.title }}</h3>
+                    <div class="video-metadata">
+                        <div class="channel-name">{{ video.author.username }}</div>
+                        <div class="video-stats">
+                            {{ video.views }} views
+                            <span>{{ video.date_posted|timesince }} ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

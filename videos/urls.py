@@ -23,4 +23,9 @@ urlpatterns = [
     path('video/<int:pk>/report/', views.report_video, name='report-video'),
     path('admin/reports/', views.manage_reports, name='manage-reports'),
     path('admin/reports/<int:pk>/handle/', views.handle_report, name='handle-report'),
+    path('admin/dashboard/', views.admin_dashboard, name='admin-dashboard'),
+    path('admin/videos/', views.admin_videos, name='admin-videos'),
+    path('admin/users/', views.admin_users, name='admin-users'),
+    path('admin/comments/', views.admin_comments, name='admin-comments'),
+    path('admin/notifications/', views.admin_notifications, name='admin-notifications'),
 ] 

@@ -22,12 +22,24 @@ from django.contrib.auth import views as auth_views
 from users import views as user_views
 
 urlpatterns = [
+    # Custom admin dashboard URLs
+    path('admin/dashboard/', user_views.admin_dashboard, name='admin-dashboard'),
+    path('admin/videos/', user_views.admin_videos, name='admin-videos'),
+    path('admin/users/', user_views.admin_users, name='admin-users'),
+    path('admin/comments/', user_views.admin_comments, name='admin-comments'),
+    path('admin/notifications/', user_views.admin_notifications, name='admin-notifications'),
+    path('admin/reports/', user_views.manage_reports, name='manage-reports'),
+    path('admin/reports/<int:pk>/handle/', user_views.handle_report, name='handle-report'),
+    
+    # Django admin URLs
     path('admin/', admin.site.urls),
+    
+    # Other URLs
     path('', include('videos.urls')),
     path('register/', user_views.register, name='register'),
     path('profile/', user_views.profile, name='profile'),
     path('settings/', user_views.settings, name='settings'),
-    path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
+    path('login/', user_views.CustomLoginView.as_view(template_name='users/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
 ]
 

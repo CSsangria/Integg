@@ -1,18 +1,19 @@
 {% extends 'videos/admin_dashboard.html' %}
 
-{% block admin_title %}Manage Reports{% endblock %}
+{% block admin_title %}Manage Videos{% endblock %}
 
 {% block admin_content %}
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Pending Reports</h5>
+        <h5 class="mb-0">All Videos</h5>
         <div class="btn-group">
             <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
                 Filter
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
                 <li><a class="dropdown-item" href="?sort=date">Sort by Date</a></li>
-                <li><a class="dropdown-item" href="?sort=reason">Sort by Reason</a></li>
+                <li><a class="dropdown-item" href="?sort=views">Sort by Views</a></li>
+                <li><a class="dropdown-item" href="?sort=likes">Sort by Likes</a></li>
             </ul>
         </div>
     </div>
@@ -21,40 +22,47 @@
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th>Video</th>
-                        <th>Reporter</th>
-                        <th>Reason</th>
-                        <th>Date Reported</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Date Posted</th>
+                        <th>Views</th>
+                        <th>Likes</th>
+                        <th>Comments</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for report in reports %}
+                    {% for video in videos %}
                     <tr>
                         <td>
-                            <a href="{% url 'video-detail' report.video.pk %}" class="text-decoration-none">
-                                {{ report.video.title }}
+                            <a href="{% url 'video-detail' video.pk %}" class="text-decoration-none">
+                                {{ video.title }}
                             </a>
                         </td>
                         <td>
-                            <a href="{% url 'user_dashboard' report.reporter.username %}" class="text-decoration-none">
-                                {{ report.reporter.username }}
+                            <a href="{% url 'user_dashboard' video.author.username %}" class="text-decoration-none">
+                                {{ video.author.username }}
                             </a>
                         </td>
-                        <td>{{ report.get_reason_display }}</td>
-                        <td>{{ report.created_at|date:"M d, Y H:i" }}</td>
+                        <td>{{ video.date_posted|date:"M d, Y" }}</td>
+                        <td>{{ video.views }}</td>
+                        <td>{{ video.total_likes }}</td>
+                        <td>{{ video.comments.count }}</td>
                         <td>
                             <div class="btn-group">
-                                <a href="{% url 'handle-report' report.pk %}" class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-eye"></i> Review
+                                <a href="{% url 'video-detail' video.pk %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i>
                                 </a>
-                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ report.pk }}">
-                                    <i class="bi bi-trash"></i> Delete Video
+                                <a href="{% url 'video-update' video.pk %}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ video.pk }}">
+                                    <i class="bi bi-trash"></i>
                                 </button>
                             </div>
 
                             <!-- Delete Modal -->
-                            <div class="modal fade" id="deleteModal{{ report.pk }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal fade" id="deleteModal{{ video.pk }}" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
@@ -62,15 +70,13 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            Are you sure you want to delete the video "{{ report.video.title }}"?
-                                            This action cannot be undone.
+                                            Are you sure you want to delete the video "{{ video.title }}"?
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                            <form action="{% url 'handle-report' report.pk %}" method="POST" class="d-inline">
+                                            <form action="{% url 'video-delete' video.pk %}" method="POST" class="d-inline">
                                                 {% csrf_token %}
-                                                <input type="hidden" name="action" value="delete">
-                                                <button type="submit" class="btn btn-danger">Delete Video</button>
+                                                <button type="submit" class="btn btn-danger">Delete</button>
                                             </form>
                                         </div>
                                     </div>
@@ -80,7 +86,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center">No pending reports found.</td>
+                        <td colspan="7" class="text-center">No videos found.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

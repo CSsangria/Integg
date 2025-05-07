@@ -445,3 +445,67 @@ def handle_report(request, pk):
         'report': report,
     }
     return render(request, 'videos/handle_report.html', context)
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def admin_dashboard(request):
+    # Get statistics for the dashboard
+    total_videos = Video.objects.count()
+    total_users = User.objects.count()
+    pending_reports = VideoReport.objects.filter(status='pending').count()
+    total_comments = Comment.objects.count()
+    
+    # Get recent videos and reports
+    recent_videos = Video.objects.all().order_by('-date_posted')[:5]
+    recent_reports = VideoReport.objects.filter(status='pending').order_by('-created_at')[:5]
+    
+    context = {
+        'total_videos': total_videos,
+        'total_users': total_users,
+        'pending_reports': pending_reports,
+        'total_comments': total_comments,
+        'recent_videos': recent_videos,
+        'recent_reports': recent_reports,
+        'active_tab': 'dashboard'
+    }
+    return render(request, 'videos/admin_dashboard.html', context)
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def admin_videos(request):
+    videos = Video.objects.all().order_by('-date_posted')
+    context = {
+        'videos': videos,
+        'active_tab': 'videos'
+    }
+    return render(request, 'videos/admin_videos.html', context)
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def admin_users(request):
+    users = User.objects.all().order_by('-date_joined')
+    context = {
+        'users': users,
+        'active_tab': 'users'
+    }
+    return render(request, 'videos/admin_users.html', context)
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def admin_comments(request):
+    comments = Comment.objects.all().order_by('-date_posted')
+    context = {
+        'comments': comments,
+        'active_tab': 'comments'
+    }
+    return render(request, 'videos/admin_comments.html', context)
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def admin_notifications(request):
+    notifications = Notification.objects.all().order_by('-created_at')
+    context = {
+        'notifications': notifications,
+        'active_tab': 'notifications'
+    }
+    return render(request, 'videos/admin_notifications.html', context)

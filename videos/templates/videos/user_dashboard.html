@@ -1,6 +1,6 @@
 {% extends 'videos/base.html' %}
 
-{% block title %}{{ profile_user.username }}'s Videos - VideoShare{% endblock %}
+{% block title %}{{ profile_user.username }}'s Videos - PiliPili{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -55,6 +55,13 @@
                 <a href="{% url 'video-detail' video.pk %}" class="text-decoration-none">
                     {% if video.thumbnail %}
                     <img src="{{ video.thumbnail.url }}" class="card-img-top" alt="{{ video.title }}" style="height: 200px; object-fit: cover;">
+                    <div class="position-absolute top-0 end-0 m-2">
+                        {% if video.orientation == 'portrait' %}
+                        <span class="badge bg-primary">Short</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Video</span>
+                        {% endif %}
+                    </div>
                     {% endif %}
                     <div class="card-body">
                         <h5 class="card-title text-dark">{{ video.title }}</h5>

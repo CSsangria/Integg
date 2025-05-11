@@ -1,6 +1,11 @@
 {% extends 'videos/base.html' %}
+{% load crispy_forms_tags %}
 
-{% block title %}{{ video.title }} - VideoShare{% endblock %}
+{% block title %}{% if form.instance.pk %}Edit{% else %}Upload{% endif %} Video - PiliPili{% endblock %}
+
+{% block extra_head %}
+<meta name="video-orientation" content="{{ video.orientation }}">
+{% endblock %}
 
 {% block content %}
 <div class="row">

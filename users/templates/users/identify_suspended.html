@@ -1,0 +1,40 @@
+{% extends 'videos/base.html' %}
+
+{% block title %}Identify Suspended Account - PiliPili{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card mt-4">
+            <div class="card-header bg-warning">
+                <h3 class="mb-0">Identify Suspended Account</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <p>To submit an appeal, please confirm your account credentials below.</p>
+                    <p>Only suspended accounts can submit appeals.</p>
+                </div>
+                
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Continue to Appeal</button>
+                    </div>
+                </form>
+                
+                <div class="mt-3 text-center">
+                    <p>Not suspended? <a href="{% url 'login' %}">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

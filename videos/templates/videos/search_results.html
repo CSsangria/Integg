@@ -1,0 +1,231 @@
+{% extends 'videos/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - PiliPili{% endblock %}
+
+{% block styles %}
+<style>
+    :root {
+        --primary-purple: #7952b3;
+        --dark-purple: #5a3d99;
+        --light-purple: #9c74d4;
+        --bright-purple: #a64edd;
+        --hover-purple: #8540c7;
+    }
+
+    .main-content {
+        max-width: 1754px;
+        margin: 0 auto;
+        padding: 24px;
+    }
+
+    .section-header {
+        margin-bottom: 24px;
+    }
+
+    .section-title {
+        font-size: 20px;
+        font-weight: 500;
+        color: var(--dark-purple);
+    }
+
+    .video-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-bottom: 48px;
+    }
+
+    .video-item {
+        display: flex;
+        flex-direction: column;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .thumbnail-container {
+        position: relative;
+        width: 100%;
+        padding-top: 56.25%; /* 16:9 Aspect Ratio */
+        background: #f8f8f8;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 12px;
+    }
+
+    .video-thumbnail {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .video-duration {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 3px 4px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    
+    .video-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        padding: 3px 6px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .video-info {
+        display: flex;
+        gap: 12px;
+    }
+
+    .channel-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    .video-details {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .video-title {
+        font-size: 16px;
+        font-weight: 500;
+        margin: 0 0 6px 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        color: #0f0f0f;
+        line-height: 1.4;
+    }
+
+    .video-metadata {
+        font-size: 14px;
+        color: #606060;
+        line-height: 1.5;
+    }
+
+    .channel-name {
+        margin-bottom: 2px;
+    }
+
+    .video-stats {
+        display: flex;
+        align-items: center;
+    }
+
+    .dot-separator {
+        margin: 0 4px;
+    }
+
+    @media (max-width: 1600px) {
+        .video-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 1200px) {
+        .video-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .video-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .alert-purple {
+        background-color: rgba(121, 82, 179, 0.1);
+        border-color: var(--primary-purple);
+        color: var(--dark-purple);
+    }
+    
+    .search-suggestion {
+        color: var(--dark-purple);
+    }
+    
+    .search-suggestion li {
+        margin-bottom: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="section-header">
+        <h2 class="section-title">
+            {% if query %}
+                Search results for "{{ query }}"
+            {% else %}
+                Search Videos
+            {% endif %}
+        </h2>
+        {% if query %}
+            <p>Found {{ videos|length }} result{{ videos|length|pluralize }}</p>
+        {% endif %}
+    </div>
+
+    {% if videos %}
+        <div class="video-grid">
+            {% for video in videos %}
+            <a href="{% url 'video-detail' video.id %}" class="video-item">
+                <div class="thumbnail-container">
+                    <img src="{{ video.thumbnail.url }}" class="video-thumbnail" alt="{{ video.title }}">
+                    {% if video.orientation == 'portrait' %}
+                        <span class="video-badge bg-primary">Short</span>
+                    {% endif %}
+                    <div class="video-duration">{{ video.format_duration }}</div>
+                </div>
+                <div class="video-info">
+                    <img src="{{ video.author.userprofile.profile_picture.url }}" class="channel-avatar" alt="{{ video.author.username }}">
+                    <div class="video-details">
+                        <h3 class="video-title">{{ video.title }}</h3>
+                        <div class="video-metadata">
+                            <div class="channel-name">{{ video.author.username }}</div>
+                            <div class="video-stats">
+                                {{ video.views }} views
+                                <span class="dot-separator">•</span>
+                                {{ video.date_posted|timesince }} ago
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        {% if query %}
+            <div class="alert alert-purple">
+                <i class="bi bi-info-circle me-2"></i> No videos found matching your search criteria.
+            </div>
+            <p class="search-suggestion">Suggestions:</p>
+            <ul class="search-suggestion">
+                <li>Check the spelling of your search term</li>
+                <li>Try using more general keywords</li>
+                <li>Try different keywords</li>
+            </ul>
+        {% else %}
+            <div class="alert alert-purple">
+                <i class="bi bi-info-circle me-2"></i> Enter a search term to find videos.
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %} 

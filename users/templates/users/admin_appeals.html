@@ -1,0 +1,211 @@
+{% extends 'videos/admin_dashboard.html' %}
+
+{% block admin_title %}Manage Account Appeals{% endblock %}
+
+{% block admin_content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3" style="border-bottom: 2px solid #7952b3;">
+        <h5 class="card-title mb-0" style="color: #5a3d99;">Account Appeals</h5>
+        <div>
+            <span class="badge rounded-pill" style="background-color: #a64edd; font-weight: 500; font-size: 0.85rem;">Pending: {{ pending_count }}</span>
+            <span class="badge rounded-pill" style="background-color: #5a3d99; font-weight: 500; font-size: 0.85rem;">Approved: {{ approved_count }}</span>
+            <span class="badge rounded-pill" style="background-color: #7952b3; font-weight: 500; font-size: 0.85rem;">Rejected: {{ rejected_count }}</span>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        {% if appeals %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">ID</th>
+                        <th>User</th>
+                        <th>Submitted</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appeal in appeals %}
+                    <tr {% if appeal.status == 'pending' %}style="background-color: rgba(121, 82, 179, 0.05);"{% endif %}>
+                        <td class="ps-3">#{{ appeal.id }}</td>
+                        <td>
+                            <a href="{% url 'user_dashboard' appeal.user.username %}" class="text-decoration-none" style="color: #5a3d99; font-weight: 500;">
+                                {{ appeal.user.username }}
+                            </a>
+                        </td>
+                        <td>{{ appeal.created_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <button type="button" class="btn btn-sm" style="background-color: #7952b3; color: white;" data-bs-toggle="modal" data-bs-target="#detailModal{{ appeal.id }}">
+                                <i class="bi bi-eye"></i> View Details
+                            </button>
+                        </td>
+                        <td>
+                            {% if appeal.status == 'pending' %}
+                            <span class="badge rounded-pill" style="background-color: #a64edd;">Pending</span>
+                            {% elif appeal.status == 'approved' %}
+                            <span class="badge rounded-pill" style="background-color: #5a3d99;">Approved</span>
+                            {% else %}
+                            <span class="badge rounded-pill" style="background-color: #7952b3;">Rejected</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-3">
+                            {% if appeal.status == 'pending' %}
+                            <button type="button" class="btn btn-sm" style="background-color: #5a3d99; color: white;" data-bs-toggle="modal" data-bs-target="#approveModal{{ appeal.id }}">
+                                <i class="bi bi-check-circle"></i> Approve
+                            </button>
+                            <button type="button" class="btn btn-sm" style="background-color: #7952b3; color: white;" data-bs-toggle="modal" data-bs-target="#rejectModal{{ appeal.id }}">
+                                <i class="bi bi-x-circle"></i> Reject
+                            </button>
+                            {% else %}
+                            <button class="btn btn-sm" style="background-color: #9c74d4; color: white; opacity: 0.7;" disabled>Processed</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert m-3" style="background-color: rgba(121, 82, 179, 0.1); border-color: #7952b3; color: #5a3d99;">No account appeals found.</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Detail Modals -->
+{% for appeal in appeals %}
+<div class="modal fade" id="detailModal{{ appeal.id }}" tabindex="-1" aria-labelledby="detailModalLabel{{ appeal.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="border-bottom: 2px solid #7952b3;">
+                <h5 class="modal-title" id="detailModalLabel{{ appeal.id }}" style="color: #5a3d99;">Appeal Details #{{ appeal.id }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6 style="color: #7952b3;">User Information</h6>
+                        <p><strong>Username:</strong> {{ appeal.user.username }}</p>
+                        <p><strong>Email:</strong> {{ appeal.user.email }}</p>
+                        <p><strong>Joined:</strong> {{ appeal.user.date_joined|date:"M d, Y" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 style="color: #7952b3;">Appeal Information</h6>
+                        <p><strong>Submitted:</strong> {{ appeal.created_at|date:"M d, Y H:i" }}</p>
+                        <p><strong>Status:</strong> 
+                            {% if appeal.status == 'pending' %}
+                            <span class="badge rounded-pill" style="background-color: #a64edd;">Pending</span>
+                            {% elif appeal.status == 'approved' %}
+                            <span class="badge rounded-pill" style="background-color: #5a3d99;">Approved</span>
+                            {% else %}
+                            <span class="badge rounded-pill" style="background-color: #7952b3;">Rejected</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 style="color: #7952b3;">Reason for Appeal</h6>
+                    <div class="p-3 rounded" style="background-color: rgba(121, 82, 179, 0.05);">{{ appeal.reason }}</div>
+                </div>
+                
+                {% if appeal.description %}
+                <div class="mb-3">
+                    <h6 style="color: #7952b3;">Detailed Explanation</h6>
+                    <div class="p-3 rounded" style="background-color: rgba(121, 82, 179, 0.05);">{{ appeal.description }}</div>
+                </div>
+                {% endif %}
+                
+                {% if appeal.admin_response %}
+                <div class="mb-3">
+                    <h6 style="color: #7952b3;">Admin Response</h6>
+                    <div class="p-3 rounded" style="background-color: rgba(121, 82, 179, 0.05);">{{ appeal.admin_response }}</div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" style="background-color: #9c74d4; color: white;" data-bs-dismiss="modal">Close</button>
+                
+                {% if appeal.status == 'pending' %}
+                <button type="button" class="btn" style="background-color: #5a3d99; color: white;" data-bs-toggle="modal" data-bs-target="#approveModal{{ appeal.id }}">
+                    <i class="bi bi-check-circle"></i> Approve
+                </button>
+                <button type="button" class="btn" style="background-color: #7952b3; color: white;" data-bs-toggle="modal" data-bs-target="#rejectModal{{ appeal.id }}">
+                    <i class="bi bi-x-circle"></i> Reject
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Approve Modals -->
+{% for appeal in appeals %}
+{% if appeal.status == 'pending' %}
+<div class="modal fade" id="approveModal{{ appeal.id }}" tabindex="-1" aria-labelledby="approveModalLabel{{ appeal.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="border-bottom: 2px solid #5a3d99;">
+                <h5 class="modal-title" id="approveModalLabel{{ appeal.id }}" style="color: #5a3d99;">Approve Appeal #{{ appeal.id }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'admin-appeals' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="appeal_id" value="{{ appeal.id }}">
+                <input type="hidden" name="action" value="approve">
+                <div class="modal-body">
+                    <p>Are you sure you want to approve this appeal from <strong style="color: #5a3d99;">{{ appeal.user.username }}</strong>?</p>
+                    <p>This will reactivate their account.</p>
+                    
+                    <div class="mb-3">
+                        <label for="admin_response" class="form-label" style="color: #7952b3;">Response Message (Optional):</label>
+                        <textarea class="form-control" id="admin_response" name="admin_response" rows="3" placeholder="Provide additional information about the approval..." style="border-color: #9c74d4; focus:border-color: #5a3d99;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" style="background-color: #9c74d4; color: white;" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn" style="background-color: #5a3d99; color: white;">Approve Appeal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+
+<!-- Reject Modals -->
+{% for appeal in appeals %}
+{% if appeal.status == 'pending' %}
+<div class="modal fade" id="rejectModal{{ appeal.id }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ appeal.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="border-bottom: 2px solid #7952b3;">
+                <h5 class="modal-title" id="rejectModalLabel{{ appeal.id }}" style="color: #7952b3;">Reject Appeal #{{ appeal.id }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'admin-appeals' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="appeal_id" value="{{ appeal.id }}">
+                <input type="hidden" name="action" value="reject">
+                <div class="modal-body">
+                    <p>Are you sure you want to reject this appeal from <strong style="color: #5a3d99;">{{ appeal.user.username }}</strong>?</p>
+                    <p>Their account will remain inactive.</p>
+                    
+                    <div class="mb-3">
+                        <label for="admin_response" class="form-label" style="color: #7952b3;">Reason for Rejection (Required):</label>
+                        <textarea class="form-control" id="admin_response" name="admin_response" rows="3" placeholder="Provide the reason for rejection..." style="border-color: #9c74d4;" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" style="background-color: #9c74d4; color: white;" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn" style="background-color: #7952b3; color: white;">Reject Appeal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+{% endblock %} 

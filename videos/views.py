@@ -4,23 +4,25 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from .models import Video, Comment, Subscription, Notification, VideoReport
+from users.models import AccountAppeal
 from .forms import VideoForm, CommentForm, VideoReportForm
 from django.http import JsonResponse
-from django.db.models import F, Sum
+from django.db.models import F, Sum, Q, Count
 import json
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.utils import timezone
+import datetime
 
 def home(request):
-    # Get latest videos
-    latest_videos = Video.objects.all().order_by('-date_posted')[:8]
+    # Get latest landscape videos only
+    latest_videos = Video.objects.filter(orientation='landscape').order_by('-date_posted')[:8]
     
-    # Get popular videos (based on views)
-    popular_videos = Video.objects.all().order_by('-views')[:8]
+    # Get popular landscape videos only (based on views)
+    popular_videos = Video.objects.filter(orientation='landscape').order_by('-views')[:8]
     
-    # Get featured video (most viewed video)
-    featured_video = Video.objects.all().order_by('-views').first()
+    # Get featured landscape video (most viewed video)
+    featured_video = Video.objects.filter(orientation='landscape').order_by('-views').first()
     
     context = {
         'latest_videos': latest_videos,
@@ -236,8 +238,32 @@ def user_dashboard(request, username):
     return render(request, 'videos/user_dashboard.html', context)
 
 def shorts(request):
+    # Check if a specific video is requested
+    video_id = request.GET.get('video')
+    
     # Get portrait videos ordered by date
     portrait_videos = Video.objects.filter(orientation='portrait').order_by('-date_posted')
+    
+    # If a specific video is requested, ensure it's at the beginning of the list
+    if video_id:
+        try:
+            # Try to get the requested video
+            requested_video = Video.objects.get(pk=video_id)
+            
+            # If it's not a portrait video, redirect to video detail
+            if requested_video.orientation != 'portrait':
+                return redirect('video-detail', pk=video_id)
+                
+            # Check if video is already in the portrait_videos queryset
+            if requested_video in portrait_videos:
+                # Remove it from its current position and add it at the beginning
+                portrait_videos = [requested_video] + [v for v in portrait_videos if v.pk != requested_video.pk]
+            else:
+                # Add it at the beginning (this might happen if it's not a portrait video)
+                portrait_videos = [requested_video] + list(portrait_videos)
+        except Video.DoesNotExist:
+            # Video not found, ignore the parameter
+            pass
     
     context = {
         'videos': portrait_videos,
@@ -459,6 +485,39 @@ def admin_dashboard(request):
     recent_videos = Video.objects.all().order_by('-date_posted')[:5]
     recent_reports = VideoReport.objects.filter(status='pending').order_by('-created_at')[:5]
     
+    # Add pending appeals and recent appeals
+    pending_appeals = AccountAppeal.objects.filter(status='pending').count()
+    recent_appeals = AccountAppeal.objects.all().order_by('-created_at')[:5]
+    
+    # For Content Distribution Chart
+    landscape_videos_count = Video.objects.filter(orientation='landscape').count()
+    portrait_videos_count = Video.objects.filter(orientation='portrait').count()
+    
+    # Additional stats for the enhanced UI
+    active_users = User.objects.filter(is_active=True).count()
+    
+    # Get new users this week
+    today = timezone.now().date()
+    week_start = today - datetime.timedelta(days=today.weekday())
+    new_users_this_week = User.objects.filter(date_joined__date__gte=week_start).count()
+    
+    # Get comments this week
+    comments_this_week = Comment.objects.filter(date_posted__date__gte=week_start).count()
+    
+    # For User Growth Chart (last 7 days)
+    dates = [(today - datetime.timedelta(days=i)) for i in range(6, -1, -1)]
+    date_strings = [date.strftime('%b %d') for date in dates]
+    
+    # Get user counts for each date
+    user_counts = []
+    for date in dates:
+        next_day = date + datetime.timedelta(days=1)
+        count = User.objects.filter(
+            date_joined__date__gte=date,
+            date_joined__date__lt=next_day
+        ).count()
+        user_counts.append(count)
+    
     context = {
         'total_videos': total_videos,
         'total_users': total_users,
@@ -466,14 +525,46 @@ def admin_dashboard(request):
         'total_comments': total_comments,
         'recent_videos': recent_videos,
         'recent_reports': recent_reports,
-        'active_tab': 'dashboard'
+        'pending_appeals': pending_appeals,
+        'recent_appeals': recent_appeals,
+        'active_tab': 'dashboard',
+        'now': timezone.now(),
+        
+        # Additional stats for enhanced UI
+        'active_users': active_users,
+        'new_users_this_week': new_users_this_week,
+        'comments_this_week': comments_this_week,
+        
+        # Chart data
+        'landscape_videos_count': landscape_videos_count,
+        'portrait_videos_count': portrait_videos_count,
+        
+        'user_growth_labels': json.dumps(date_strings),
+        'user_growth_data': json.dumps(user_counts),
     }
     return render(request, 'videos/admin_dashboard.html', context)
 
 @login_required
 @user_passes_test(lambda u: u.is_staff)
 def admin_videos(request):
-    videos = Video.objects.all().order_by('-date_posted')
+    videos = Video.objects.all()
+    
+    # Handle sorting parameters
+    sort = request.GET.get('sort')
+    if sort == 'date':
+        videos = videos.order_by('-date_posted')
+    elif sort == 'views':
+        videos = videos.order_by('-views')
+    elif sort == 'likes':
+        videos = videos.annotate(like_count=Sum('likes')).order_by('-like_count')
+    else:
+        videos = videos.order_by('-date_posted')  # Default sort
+    
+    # Handle orientation filter
+    orientation = request.GET.get('orientation')
+    if orientation in ['landscape', 'portrait']:
+        videos = videos.filter(orientation=orientation)
+    
     context = {
         'videos': videos,
         'active_tab': 'videos'
@@ -483,10 +574,37 @@ def admin_videos(request):
 @login_required
 @user_passes_test(lambda u: u.is_staff)
 def admin_users(request):
-    users = User.objects.all().order_by('-date_joined')
+    # Start with all users
+    users = User.objects.all()
+    
+    # Handle search query
+    search_query = request.GET.get('search', '')
+    if search_query:
+        users = users.filter(
+            Q(username__icontains=search_query) |
+            Q(email__icontains=search_query)
+        )
+    
+    # Handle status filter
+    status_filter = request.GET.get('status')
+    if status_filter == 'active':
+        users = users.filter(is_active=True)
+    elif status_filter == 'inactive':
+        users = users.filter(is_active=False)
+    
+    # Handle sorting parameters
+    sort = request.GET.get('sort')
+    if sort == 'username':
+        users = users.order_by('username')
+    else:  # default to date sorting
+        users = users.order_by('-date_joined')
+    
     context = {
         'users': users,
-        'active_tab': 'users'
+        'active_tab': 'users',
+        'current_sort': sort or 'date',
+        'search_query': search_query,
+        'status_filter': status_filter
     }
     return render(request, 'videos/admin_users.html', context)
 
@@ -509,3 +627,23 @@ def admin_notifications(request):
         'active_tab': 'notifications'
     }
     return render(request, 'videos/admin_notifications.html', context)
+
+def search_videos(request):
+    query = request.GET.get('q', '')
+    
+    if query:
+        # Search in title and description
+        search_results = Video.objects.filter(
+            Q(title__icontains=query) | 
+            Q(description__icontains=query)
+        ).order_by('-date_posted')
+    else:
+        search_results = Video.objects.none()
+    
+    context = {
+        'videos': search_results,
+        'query': query,
+        'page_title': f'Search results for "{query}"'
+    }
+    
+    return render(request, 'videos/search_results.html', context)

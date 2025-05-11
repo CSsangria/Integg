@@ -1,0 +1,84 @@
+{% extends 'videos/base.html' %}
+
+{% block title %}Submit Appeal - PiliPili{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card mt-4">
+            <div class="card-header" style="background-color: #5a3d99; color: white;">
+                <h3 class="mb-0">Account Suspended</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert" style="background-color: rgba(121, 82, 179, 0.1); border-color: #7952b3; color: #5a3d99;">
+                    <p>The account <strong>{{ username }}</strong> has been suspended due to a violation of our community guidelines.</p>
+                    
+                    {% if recent_suspension %}
+                    <div class="mt-2 mb-2 p-3 border rounded bg-light" style="border-color: #7952b3 !important;">
+                        <h6 style="color: #5a3d99;">Suspension Information:</h6>
+                        <p><strong>Reason:</strong> {{ recent_suspension.reason|slice:"8:" }}</p>
+                        {% if recent_suspension.admin_response %}
+                        <p><strong>Admin Comment:</strong> {{ recent_suspension.admin_response }}</p>
+                        {% endif %}
+                        <p><small>Suspended on: {{ recent_suspension.created_at|date:"M d, Y H:i" }}</small></p>
+                    </div>
+                    {% endif %}
+                    
+                    <p>To appeal this decision, please explain why your account should be reactivated below.</p>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="reason" class="form-label" style="color: #5a3d99; font-weight: 500;">Reason for Appeal:</label>
+                        <select name="reason" id="reason" class="form-select" style="border-color: #9c74d4;" required>
+                            <option value="">Select a reason...</option>
+                            <option value="mistake">I believe this was a mistake</option>
+                            <option value="misunderstanding">There was a misunderstanding</option>
+                            <option value="changed">I've changed my behavior</option>
+                            <option value="other">Other reason</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label" style="color: #5a3d99; font-weight: 500;">Detailed Explanation:</label>
+                        <textarea name="description" id="description" rows="5" class="form-control" style="border-color: #9c74d4;" placeholder="Please provide details to support your appeal..." required></textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn" style="background-color: #7952b3; color: white;">Submit Appeal</button>
+                    </div>
+                </form>
+                
+                {% if previous_appeals %}
+                <hr>
+                <h5 style="color: #5a3d99;">Previous Appeals</h5>
+                <div class="list-group mt-3">
+                    {% for appeal in previous_appeals %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1" style="color: #5a3d99;">Appeal #{{ appeal.id }}</h6>
+                            <small>{{ appeal.created_at|date:"M d, Y" }}</small>
+                        </div>
+                        <p class="mb-1"><strong>Status:</strong> 
+                            {% if appeal.status == 'pending' %}
+                            <span class="badge rounded-pill" style="background-color: #a64edd;">Pending</span>
+                            {% elif appeal.status == 'approved' %}
+                            <span class="badge rounded-pill" style="background-color: #5a3d99;">Approved</span>
+                            {% else %}
+                            <span class="badge rounded-pill" style="background-color: #7952b3;">Rejected</span>
+                            {% endif %}
+                        </p>
+                        <p class="mb-1"><strong>Reason:</strong> {{ appeal.reason }}</p>
+                        {% if appeal.admin_response %}
+                        <div class="alert mt-2 mb-0" style="background-color: rgba(121, 82, 179, 0.1); border-color: #7952b3; color: #5a3d99;">
+                            <strong>Admin Response:</strong> {{ appeal.admin_response }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

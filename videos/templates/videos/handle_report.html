@@ -3,26 +3,26 @@
 {% block admin_title %}Handle Report{% endblock %}
 
 {% block admin_content %}
-<div class="card">
-    <div class="card-header">
-        <h5 class="mb-0">Report Details</h5>
+<div class="card shadow-sm">
+    <div class="card-header bg-white py-3" style="border-bottom: 2px solid #7952b3;">
+        <h5 class="card-title mb-0" style="color: #5a3d99;">Report Details</h5>
     </div>
     <div class="card-body">
         <div class="row mb-4">
             <div class="col-md-6">
-                <h6>Video Information</h6>
+                <h6 style="color: #7952b3;">Video Information</h6>
                 <p><strong>Title:</strong> {{ report.video.title }}</p>
-                <p><strong>Author:</strong> {{ report.video.author.username }}</p>
+                <p><strong>Author:</strong> <a href="{% url 'user_dashboard' report.video.author.username %}" class="text-decoration-none" style="color: #5a3d99;">{{ report.video.author.username }}</a></p>
                 <p><strong>Date Posted:</strong> {{ report.video.date_posted|date:"M d, Y" }}</p>
                 <p><strong>Views:</strong> {{ report.video.views }}</p>
-                <a href="{% url 'video-detail' report.video.pk %}" class="btn btn-sm btn-outline-primary">
+                <a href="{% url 'video-detail' report.video.pk %}" class="btn btn-sm" style="background-color: #7952b3; color: white;">
                     <i class="bi bi-eye"></i> View Video
                 </a>
             </div>
             <div class="col-md-6">
-                <h6>Report Information</h6>
-                <p><strong>Reporter:</strong> {{ report.reporter.username }}</p>
-                <p><strong>Reason:</strong> {{ report.get_reason_display }}</p>
+                <h6 style="color: #7952b3;">Report Information</h6>
+                <p><strong>Reporter:</strong> <a href="{% url 'user_dashboard' report.reporter.username %}" class="text-decoration-none" style="color: #5a3d99;">{{ report.reporter.username }}</a></p>
+                <p><strong>Reason:</strong> <span class="badge rounded-pill" style="background-color: #9c74d4;">{{ report.get_reason_display }}</span></p>
                 <p><strong>Date Reported:</strong> {{ report.created_at|date:"M d, Y H:i" }}</p>
                 {% if report.description %}
                 <p><strong>Description:</strong> {{ report.description }}</p>
@@ -32,17 +32,20 @@
 
         <div class="row">
             <div class="col-12">
-                <h6>Actions</h6>
+                <h6 style="color: #7952b3;">Actions</h6>
                 <div class="btn-group">
                     <form action="{% url 'handle-report' report.pk %}" method="POST" class="d-inline me-2">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="dismiss">
-                        <button type="submit" class="btn btn-outline-secondary">
+                        <button type="submit" class="btn" style="background-color: #5a3d99; color: white;">
                             <i class="bi bi-check-circle"></i> Dismiss Report
                         </button>
                     </form>
-                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <button type="button" class="btn me-2" style="background-color: #7952b3; color: white;" data-bs-toggle="modal" data-bs-target="#deleteModal">
                         <i class="bi bi-trash"></i> Delete Video
+                    </button>
+                    <button type="button" class="btn me-2" style="background-color: #9c74d4; color: white;" data-bs-toggle="modal" data-bs-target="#suspendModal">
+                        <i class="bi bi-person-slash"></i> Suspend Author
                     </button>
                 </div>
             </div>
@@ -54,8 +57,8 @@
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Delete Video</h5>
+            <div class="modal-header" style="border-bottom: 2px solid #7952b3;">
+                <h5 class="modal-title" style="color: #5a3d99;">Delete Video</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -63,14 +66,116 @@
                 This action cannot be undone.
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn" style="background-color: #9c74d4; color: white;" data-bs-dismiss="modal">Cancel</button>
                 <form action="{% url 'handle-report' report.pk %}" method="POST" class="d-inline">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="delete">
-                    <button type="submit" class="btn btn-danger">Delete Video</button>
+                    <button type="submit" class="btn" style="background-color: #7952b3; color: white;">Delete Video</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Suspend Author Modal -->
+<div class="modal fade" id="suspendModal" tabindex="-1" aria-labelledby="suspendModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="border-bottom: 2px solid #7952b3;">
+                <h5 class="modal-title" id="suspendModalLabel" style="color: #5a3d99;">Suspend Author</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'handle-report' report.pk %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="suspend">
+                <div class="modal-body">
+                    <p>Are you sure you want to suspend the user "<strong style="color: #5a3d99;">{{ report.video.author.username }}</strong>"?</p>
+                    <p>This will deactivate their account.</p>
+                    
+                    <div class="mb-3">
+                        <label for="suspension_reason" class="form-label" style="color: #7952b3;">Suspension Reason:</label>
+                        <select class="form-select" id="suspension_reason" name="suspension_reason" style="border-color: #9c74d4;" required>
+                            <option value="" selected disabled>Select a reason for suspension...</option>
+                            <option value="Content Policy Violation">Content Policy Violation</option>
+                            <option value="Hate Speech">Hate Speech</option>
+                            <option value="Harassment">Harassment</option>
+                            <option value="Spam">Spam or Misleading Content</option>
+                            <option value="Impersonation">Impersonation</option>
+                            <option value="NSFW Content">NSFW Content</option>
+                            <option value="Copyright">Copyright Infringement</option>
+                            <option value="Multiple Violations">Multiple Violations</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="suspension_notes" class="form-label" style="color: #7952b3;">Additional Notes (Optional):</label>
+                        <textarea class="form-control" id="suspension_notes" name="suspension_notes" rows="3" style="border-color: #9c74d4;" placeholder="Additional details about this suspension..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" style="background-color: #9c74d4; color: white;" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn" style="background-color: #7952b3; color: white;">Suspend Author</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Completely remove backdrop and make modals work
+  var style = document.createElement('style');
+  style.textContent = `
+    .modal-backdrop {
+      display: none !important;
+    }
+    
+    .modal.show {
+      background-color: transparent !important;
+      pointer-events: none !important;
+    }
+    
+    .modal-dialog {
+      pointer-events: auto !important;
+      margin-top: 10vh !important;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3) !important;
+    }
+    
+    .modal-content {
+      border: 1px solid rgba(0,0,0,0.2) !important;
+    }
+  `;
+  document.head.appendChild(style);
+  
+  // Fix for the "Suspend Author (Direct)" button
+  var directSuspendBtn = document.querySelector('button.btn-warning');
+  if (directSuspendBtn) {
+    directSuspendBtn.addEventListener('click', function(e) {
+      if (!confirm('Are you sure you want to suspend this author without specifying a reason?')) {
+        e.preventDefault();
+      }
+    });
+  }
+  
+  // Also handle buttons dynamically after the modal opens
+  document.querySelectorAll('.modal').forEach(function(modal) {
+    modal.addEventListener('shown.bs.modal', function() {
+      // Ensure buttons in modals are clickable
+      this.querySelectorAll('button').forEach(function(btn) {
+        btn.style.position = 'relative';
+        btn.style.zIndex = '9999';
+      });
+      
+      // Ensure form inputs are clickable
+      this.querySelectorAll('input, select, textarea').forEach(function(input) {
+        input.style.position = 'relative';
+        input.style.zIndex = '9999';
+      });
+    });
+  });
+});
+</script>
 {% endblock %} 

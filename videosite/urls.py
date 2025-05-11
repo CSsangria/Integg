@@ -30,6 +30,8 @@ urlpatterns = [
     path('admin/notifications/', user_views.admin_notifications, name='admin-notifications'),
     path('admin/reports/', user_views.manage_reports, name='manage-reports'),
     path('admin/reports/<int:pk>/handle/', user_views.handle_report, name='handle-report'),
+    path('admin/appeals/', user_views.admin_appeals, name='admin-appeals'),
+    path('submit-appeal/', user_views.submit_appeal, name='submit-appeal'),
     
     # Django admin URLs
     path('admin/', admin.site.urls),
@@ -45,3 +47,4 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

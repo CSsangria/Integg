@@ -3,17 +3,21 @@
 {% block admin_title %}Manage Videos{% endblock %}
 
 {% block admin_content %}
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">All Videos</h5>
+<div class="card shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3" style="border-bottom: 2px solid #7952b3;">
+        <h5 class="card-title mb-0" style="color: #5a3d99;">All Videos</h5>
         <div class="btn-group">
-            <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
-                Filter
+            <button type="button" class="btn btn-sm dropdown-toggle" style="color: #7952b3; border-color: #7952b3;" data-bs-toggle="dropdown">
+                <i class="bi bi-funnel me-1"></i> Filter
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
                 <li><a class="dropdown-item" href="?sort=date">Sort by Date</a></li>
                 <li><a class="dropdown-item" href="?sort=views">Sort by Views</a></li>
                 <li><a class="dropdown-item" href="?sort=likes">Sort by Likes</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="?orientation=landscape">Show Videos</a></li>
+                <li><a class="dropdown-item" href="?orientation=portrait">Show Shorts</a></li>
+                <li><a class="dropdown-item" href="?">Show All</a></li>
             </ul>
         </div>
     </div>
@@ -23,6 +27,7 @@
                 <thead>
                     <tr>
                         <th>Title</th>
+                        <th>Type</th>
                         <th>Author</th>
                         <th>Date Posted</th>
                         <th>Views</th>
@@ -35,12 +40,19 @@
                     {% for video in videos %}
                     <tr>
                         <td>
-                            <a href="{% url 'video-detail' video.pk %}" class="text-decoration-none">
+                            <a href="{% url 'video-detail' video.pk %}" class="text-decoration-none" style="color: #5a3d99;">
                                 {{ video.title }}
                             </a>
                         </td>
                         <td>
-                            <a href="{% url 'user_dashboard' video.author.username %}" class="text-decoration-none">
+                            {% if video.orientation == 'portrait' %}
+                            <span class="badge rounded-pill" style="background-color: #9c74d4;">Short</span>
+                            {% else %}
+                            <span class="badge rounded-pill" style="background-color: #7952b3;">Video</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'user_dashboard' video.author.username %}" class="text-decoration-none" style="color: #7952b3;">
                                 {{ video.author.username }}
                             </a>
                         </td>
@@ -50,13 +62,13 @@
                         <td>{{ video.comments.count }}</td>
                         <td>
                             <div class="btn-group">
-                                <a href="{% url 'video-detail' video.pk %}" class="btn btn-sm btn-outline-primary">
+                                <a href="{% url 'video-detail' video.pk %}" class="btn btn-sm" style="background-color: #7952b3; color: white;">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <a href="{% url 'video-update' video.pk %}" class="btn btn-sm btn-outline-secondary">
+                                <a href="{% url 'video-update' video.pk %}" class="btn btn-sm" style="background-color: #5a3d99; color: white;">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ video.pk }}">
+                                <button type="button" class="btn btn-sm" style="background-color: #9c74d4; color: white;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ video.pk }}">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </div>
@@ -65,18 +77,18 @@
                             <div class="modal fade" id="deleteModal{{ video.pk }}" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Delete Video</h5>
+                                        <div class="modal-header" style="border-bottom: 2px solid #7952b3;">
+                                            <h5 class="modal-title" style="color: #5a3d99;">Delete Video</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
                                             Are you sure you want to delete the video "{{ video.title }}"?
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="button" class="btn" style="background-color: #9c74d4; color: white;" data-bs-dismiss="modal">Cancel</button>
                                             <form action="{% url 'video-delete' video.pk %}" method="POST" class="d-inline">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                                <button type="submit" class="btn" style="background-color: #7952b3; color: white;">Delete</button>
                                             </form>
                                         </div>
                                     </div>
@@ -86,7 +98,9 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center">No videos found.</td>
+                        <td colspan="8" class="text-center">
+                            <div class="alert m-3" style="background-color: rgba(121, 82, 179, 0.1); border-color: #7952b3; color: #5a3d99;">No videos found.</div>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

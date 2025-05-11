@@ -13,6 +13,26 @@ class UserProfile(models.Model):
     def __str__(self):
         return f'{self.user.username} Profile'
 
+class AccountAppeal(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    )
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='appeals')
+    reason = models.TextField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    admin_response = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f'Appeal from {self.user.username} - {self.status}'
+
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:

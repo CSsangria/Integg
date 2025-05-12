@@ -1,0 +1,415 @@
+{% extends 'videos/base.html' %}
+
+{% block title %}Watch History - PiliPili{% endblock %}
+
+{% block styles %}
+<style>
+    .main-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 24px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .video-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+
+    .video-item {
+        display: flex;
+        flex-direction: column;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .thumbnail-container {
+        position: relative;
+        width: 100%;
+        padding-top: 56.25%; /* 16:9 Aspect Ratio */
+        background: #f8f8f8;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 12px;
+    }
+
+    .video-thumbnail {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .video-duration {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 3px 4px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .video-info {
+        display: flex;
+        gap: 12px;
+    }
+
+    .channel-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    .video-details {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .video-title {
+        font-size: 16px;
+        font-weight: 500;
+        margin: 0 0 6px 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        color: var(--text-color);
+        line-height: 1.4;
+    }
+
+    .video-metadata {
+        font-size: 14px;
+        color: var(--light-text);
+        line-height: 1.5;
+    }
+
+    .channel-name {
+        margin-bottom: 2px;
+    }
+
+    .watched-date {
+        font-size: 14px;
+        color: var(--light-text);
+    }
+
+    .empty-state {
+        text-align: center;
+        margin: 4rem auto;
+        max-width: 500px;
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    .btn-clear-history {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+    }
+
+    @media (max-width: 1200px) {
+        .video-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .video-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    /* Sidebar styling */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding: 48px 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+        background-color: var(--card-bg);
+        width: 250px;
+        transition: all 0.3s ease;
+    }
+    
+    /* Collapsed sidebar styles */
+    .sidebar.collapsed {
+        width: 60px;
+        overflow-x: hidden;
+    }
+    
+    .sidebar.collapsed .nav-link span {
+        display: none;
+    }
+    
+    .sidebar.collapsed .nav-link {
+        text-align: center;
+        padding: 0.75rem 0;
+        justify-content: center;
+    }
+    
+    .sidebar.collapsed .nav-link i {
+        margin-right: 0;
+        font-size: 1.25rem;
+    }
+    
+    .sidebar .nav-link {
+        font-weight: 500;
+        color: var(--text-color);
+        padding: 0.75rem 1.25rem;
+        margin: 0.2rem 0.5rem;
+        border-radius: 0.25rem;
+        display: flex;
+        align-items: center;
+        transition: all 0.2s;
+    }
+    
+    .sidebar .nav-link i {
+        color: var(--primary-color);
+        margin-right: 0.75rem;
+        font-size: 1.1rem;
+    }
+    
+    .sidebar .nav-link.active {
+        color: var(--primary-color) !important;
+        background-color: rgba(var(--primary-color-rgb), 0.1);
+        font-weight: 600;
+    }
+    
+    .sidebar .nav-link.active i {
+        color: var(--primary-color);
+    }
+    
+    .sidebar .nav-link:hover {
+        color: var(--primary-color) !important;
+        background-color: rgba(var(--primary-color-rgb), 0.05);
+    }
+    
+    /* Main content area */
+    main {
+        padding-top: 1.5rem;
+        background-color: var(--secondary-color);
+        min-height: 100vh;
+        transition: all 0.3s ease;
+    }
+    
+    main.expanded {
+        margin-left: 60px !important;
+    }
+    
+    /* Toggle button styling */
+    #sidebarToggle {
+        background-color: transparent;
+        color: var(--primary-color);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        transition: all 0.2s;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    #sidebarToggle:hover {
+        background-color: rgba(121, 82, 179, 0.1);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    #sidebarToggle i {
+        font-size: 1.25rem;
+    }
+    
+    /* Sidebar toggle top position */
+    .sidebar-toggle-top {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        z-index: 1000;
+    }
+    
+    /* Additional space for navigation to prevent overlap */
+    .nav.flex-column {
+        margin-top: 45px !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block sidebar">
+            <div class="position-sticky pt-4">
+                <button id="sidebarToggle" class="btn btn-sm sidebar-toggle-top">
+                    <i class="bi bi-list"></i>
+                </button>
+                
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">
+                            <i class="bi bi-house-door"></i>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'your_videos' %}">
+                            <i class="bi bi-collection-play"></i>
+                            <span>Your Videos</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'watch_history' %}">
+                            <i class="bi bi-clock-history"></i>
+                            <span>Watch History</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'saved_videos' %}">
+                            <i class="bi bi-bookmark"></i>
+                            <span>Saved Videos</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'liked_videos' %}">
+                            <i class="bi bi-heart"></i>
+                            <span>Liked Videos</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% if not user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            <span>Login</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register' %}">
+                            <i class="bi bi-person-plus"></i>
+                            <span>Register</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="main-content">
+                <div class="page-header">
+                    <h2 class="section-title">Watch History</h2>
+                    {% if history %}
+                    <form method="POST" action="{% url 'clear_watch_history' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-clear-history" onclick="return confirm('Are you sure you want to clear your watch history?')">
+                            <i class="bi bi-trash"></i> Clear History
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+
+                {% if history %}
+                <div class="video-grid">
+                    {% for item in history %}
+                    <a href="{% url 'video-detail' item.video.id %}" class="video-item">
+                        <div class="thumbnail-container">
+                            <img src="{{ item.video.thumbnail.url }}" class="video-thumbnail" alt="{{ item.video.title }}">
+                            <div class="video-duration">{{ item.video.format_duration }}</div>
+                        </div>
+                        <div class="video-info">
+                            <img src="{{ item.video.author.userprofile.profile_picture.url }}" class="channel-avatar" alt="{{ item.video.author.username }}">
+                            <div class="video-details">
+                                <h3 class="video-title">{{ item.video.title }}</h3>
+                                <div class="video-metadata">
+                                    <div class="channel-name">{{ item.video.author.username }}</div>
+                                    <div class="video-stats">
+                                        {{ item.video.views }} views
+                                    </div>
+                                </div>
+                                <div class="watched-date">
+                                    <i class="bi bi-clock-history"></i> Watched: {{ item.watched_at|timesince }} ago
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <h3>Your watch history is empty</h3>
+                    <p>Videos you watch will appear here</p>
+                    <a href="{% url 'home' %}" class="btn btn-primary">Browse videos</a>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('main');
+        
+        // Check if the sidebar is collapsed in localStorage
+        const isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        
+        // Apply the initial state
+        if (isSidebarCollapsed) {
+            sidebar.classList.add('collapsed');
+            mainContent.classList.add('expanded');
+        }
+        
+        // Update the toggle button icon
+        function updateToggleIcon() {
+            const icon = sidebarToggle.querySelector('i');
+            if (sidebar.classList.contains('collapsed')) {
+                icon.classList.remove('bi-list');
+                icon.classList.add('bi-arrow-right-square');
+            } else {
+                icon.classList.remove('bi-arrow-right-square');
+                icon.classList.add('bi-list');
+            }
+        }
+        
+        // Initialize the icon
+        updateToggleIcon();
+        
+        // Add click event to toggle the sidebar
+        sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+            
+            // Save the state to localStorage
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+            
+            // Update the icon
+            updateToggleIcon();
+        });
+    });
+</script>
+{% endblock %} 

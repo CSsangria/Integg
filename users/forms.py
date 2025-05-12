@@ -20,9 +20,14 @@ class UserRegisterForm(UserCreationForm):
 class UserProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = UserProfile
-        fields = ['profile_picture', 'bio']
+        fields = ['profile_picture', 'bio', 'dark_mode', 'theme']
         widgets = {
             'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'theme': forms.Select(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'dark_mode': 'Enable Dark Mode',
+            'theme': 'Select Theme',
         }
 
 class CustomPasswordChangeForm(PasswordChangeForm):

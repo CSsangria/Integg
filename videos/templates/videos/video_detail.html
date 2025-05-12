@@ -37,6 +37,10 @@
                             <i class="bi bi-heart{% if user in video.likes.all %}-fill{% endif %}"></i>
                             <span class="like-count">{{ video.total_likes }}</span>
                         </button>
+                        <button class="btn btn-outline-primary save-button" data-video-id="{{ video.pk }}">
+                            <i class="bi bi-bookmark{% if is_saved %}-fill{% endif %}"></i>
+                            <span>Save</span>
+                        </button>
                         {% if user.is_authenticated %}
                             <a href="{% url 'report-video' video.pk %}" class="btn btn-outline-danger">
                                 <i class="bi bi-flag"></i>
@@ -199,7 +203,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 likeCount.textContent = data.total_likes;
-            });
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+
+    // Video save functionality
+    const saveButtons = document.querySelectorAll('.save-button');
+    saveButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const videoId = this.dataset.videoId;
+            fetch(`/video/${videoId}/save/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const bookmarkIcon = this.querySelector('i');
+                
+                if (data.saved) {
+                    bookmarkIcon.classList.remove('bi-bookmark');
+                    bookmarkIcon.classList.add('bi-bookmark-fill');
+                } else {
+                    bookmarkIcon.classList.remove('bi-bookmark-fill');
+                    bookmarkIcon.classList.add('bi-bookmark');
+                }
+            })
+            .catch(error => console.error('Error:', error));
         });
     });
 

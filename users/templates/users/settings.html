@@ -17,9 +17,51 @@
                 </div>
                 <form method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
-                    {{ profile_form|crispy }}
+                    {{ profile_form.bio|as_crispy_field }}
+                    {{ profile_form.profile_picture|as_crispy_field }}
                     <div class="mt-3">
                         <button type="submit" name="profile_submit" class="btn btn-primary">Update Profile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Theme Settings Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="mb-0">Theme Settings</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ profile_form.dark_mode|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ profile_form.theme|as_crispy_field }}
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5>Theme Preview</h5>
+                        <div class="row mt-3">
+                            <div class="col">
+                                <div id="theme-preview" class="p-3 rounded" style="border: 1px solid #ddd; min-height: 100px;">
+                                    <div class="preview-header p-2 mb-2 rounded" style="background-color: var(--primary-color); color: white;">
+                                        Header Preview
+                                    </div>
+                                    <div class="preview-content p-2 rounded" style="background: white; border: 1px solid #eee;">
+                                        <p style="color: var(--text-color);">This is how your selected theme will look.</p>
+                                        <button class="btn btn-sm" style="background-color: var(--primary-color); color: white;">Button Example</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <button type="submit" name="theme_submit" class="btn btn-primary">Update Theme</button>
                     </div>
                 </form>
             </div>
@@ -42,4 +84,60 @@
         </div>
     </div>
 </div>
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const themeSelect = document.getElementById('id_theme');
+        const darkModeCheckbox = document.getElementById('id_dark_mode');
+        const themePreview = document.getElementById('theme-preview');
+        const previewHeader = themePreview.querySelector('.preview-header');
+        const previewContent = themePreview.querySelector('.preview-content');
+        const previewButton = previewContent.querySelector('.btn');
+        const previewText = previewContent.querySelector('p');
+        
+        function updatePreview() {
+            const isDarkMode = darkModeCheckbox.checked;
+            const selectedTheme = themeSelect.value;
+            
+            // Default theme colors
+            let primaryColor = '#fb7299';  // Pink (default)
+            let secondaryColor = isDarkMode ? '#252525' : '#f4f4f5';
+            let textColor = isDarkMode ? '#f5f5f7' : '#18191c';
+            let cardBg = isDarkMode ? '#333333' : '#ffffff';
+            
+            // Set theme-specific colors
+            if (selectedTheme === 'purple') {
+                primaryColor = '#7952b3';
+            } else if (selectedTheme === 'blue') {
+                primaryColor = '#375a7f';
+            } else if (selectedTheme === 'green') {
+                primaryColor = '#2ecc71';
+            } else if (selectedTheme === 'orange') {
+                primaryColor = '#e67e22';
+            }
+            
+            // Update preview
+            themePreview.style.backgroundColor = secondaryColor;
+            themePreview.style.border = isDarkMode ? '1px solid #444' : '1px solid #ddd';
+            
+            previewHeader.style.backgroundColor = primaryColor;
+            
+            previewContent.style.backgroundColor = cardBg;
+            previewContent.style.border = isDarkMode ? '1px solid #444' : '1px solid #eee';
+            
+            previewText.style.color = textColor;
+            
+            previewButton.style.backgroundColor = primaryColor;
+        }
+        
+        // Update preview on change
+        themeSelect.addEventListener('change', updatePreview);
+        darkModeCheckbox.addEventListener('change', updatePreview);
+        
+        // Initial preview update
+        updatePreview();
+    });
+</script>
+{% endblock %}
 {% endblock %} 

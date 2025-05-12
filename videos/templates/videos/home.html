@@ -1,49 +1,164 @@
 {% extends 'videos/base.html' %}
+{% load static %}
 
 {% block title %}Home - PiliPili{% endblock %}
 
 {% block styles %}
 <style>
-    .main-content {
-        max-width: 1754px;
-        margin: 0 auto;
-        padding: 24px;
+    /* Theme Variables */
+    :root {
+        /* These will be overridden by the base theme variables */
+        --primary-purple: var(--primary-color);
+        --dark-purple: var(--dark-color);
+        --light-purple: var(--primary-color);
+        --bright-purple: var(--primary-color);
+        --hover-purple: var(--primary-color);
     }
-
-    .section-header {
-        margin-bottom: 24px;
+    
+    /* Sidebar styling */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding: 48px 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+        background-color: var(--card-bg);
+        width: 250px;
+        transition: all 0.3s ease;
     }
-
-    .section-title {
-        font-size: 20px;
+    
+    /* Collapsed sidebar styles */
+    .sidebar.collapsed {
+        width: 60px;
+        overflow-x: hidden;
+    }
+    
+    .sidebar.collapsed .nav-link span {
+        display: none;
+    }
+    
+    .sidebar.collapsed .nav-link {
+        text-align: center;
+        padding: 0.75rem 0;
+        justify-content: center;
+    }
+    
+    .sidebar.collapsed .nav-link i {
+        margin-right: 0;
+        font-size: 1.25rem;
+    }
+    
+    .sidebar .nav-link {
         font-weight: 500;
-        color: #0f0f0f;
+        color: var(--text-color);
+        padding: 0.75rem 1.25rem;
+        margin: 0.2rem 0.5rem;
+        border-radius: 0.25rem;
+        display: flex;
+        align-items: center;
+        transition: all 0.2s;
     }
-
+    
+    .sidebar .nav-link i {
+        color: var(--primary-color);
+        margin-right: 0.75rem;
+        font-size: 1.1rem;
+    }
+    
+    .sidebar .nav-link.active {
+        color: var(--primary-color) !important;
+        background-color: rgba(var(--primary-color-rgb), 0.1);
+        font-weight: 600;
+    }
+    
+    .sidebar .nav-link.active i {
+        color: var(--primary-color);
+    }
+    
+    .sidebar .nav-link:hover {
+        color: var(--primary-color) !important;
+        background-color: rgba(var(--primary-color-rgb), 0.05);
+    }
+    
+    /* Main content area */
+    main {
+        padding-top: 1.5rem;
+        background-color: var(--secondary-color);
+        min-height: 100vh;
+        transition: all 0.3s ease;
+    }
+    
+    main.expanded {
+        margin-left: 60px !important;
+    }
+    
+    /* Make the main content wider */
+    main .container-fluid {
+        max-width: 1900px;
+        margin: 0 auto;
+    }
+    
+    .page-header {
+        border-bottom: 2px solid rgba(var(--primary-color-rgb), 0.2);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+    }
+    
+    .page-header h1 {
+        color: var(--text-color);
+        font-weight: 600;
+    }
+    
+    /* Card styling */
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: none;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+        height: 100%;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px rgba(var(--primary-color-rgb), 0.1) !important;
+    }
+    
+    .shadow-sm {
+        box-shadow: 0 .125rem .375rem rgba(var(--primary-color-rgb), 0.15) !important;
+    }
+    
+    /* Video grid and item styling */
     .video-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 20px;
-        margin-bottom: 48px;
+        gap: 24px;
+        margin-bottom: 2rem;
     }
-
+    
     .video-item {
         display: flex;
         flex-direction: column;
         text-decoration: none;
         color: inherit;
+        transition: transform 0.2s;
     }
-
+    
+    .video-item:hover {
+        transform: translateY(-5px);
+    }
+    
     .thumbnail-container {
         position: relative;
         width: 100%;
         padding-top: 56.25%; /* 16:9 Aspect Ratio */
         background: #f8f8f8;
-        border-radius: 12px;
+        border-radius: 8px 8px 0 0;
         overflow: hidden;
-        margin-bottom: 12px;
+        margin-bottom: 0;
     }
-
+    
     .video-thumbnail {
         position: absolute;
         top: 0;
@@ -52,195 +167,723 @@
         height: 100%;
         object-fit: cover;
     }
-
+    
     .video-duration {
         position: absolute;
         bottom: 8px;
         right: 8px;
-        background: rgba(0, 0, 0, 0.8);
+        background: rgba(0, 0, 0, 0.75);
         color: white;
-        padding: 3px 4px;
-        border-radius: 4px;
+        padding: 2px 5px;
+        border-radius: 3px;
         font-size: 12px;
         font-weight: 500;
     }
-
+    
     .video-info {
         display: flex;
         gap: 12px;
+        padding: 12px;
     }
-
+    
     .channel-avatar {
-        width: 36px;
-        height: 36px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         object-fit: cover;
         flex-shrink: 0;
     }
-
+    
     .video-details {
         flex: 1;
         min-width: 0;
+        display: flex;
+        flex-direction: column;
     }
-
+    
     .video-title {
-        font-size: 16px;
-        font-weight: 500;
+        font-size: 14px;
+        font-weight: 600;
         margin: 0 0 6px 0;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
-        color: #0f0f0f;
-        line-height: 1.4;
+        color: var(--text-color);
+        line-height: 1.3;
     }
-
+    
     .video-metadata {
-        font-size: 14px;
-        color: #606060;
-        line-height: 1.5;
+        font-size: 12px;
+        color: var(--light-text);
+        line-height: 1.4;
+        display: flex;
+        flex-direction: column;
     }
-
+    
     .channel-name {
-        margin-bottom: 2px;
+        margin-bottom: 4px;
+        font-weight: 500;
     }
-
+    
     .video-stats {
         display: flex;
-        align-items: center;
-        gap: 4px;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 2px;
     }
-
-    .video-stats::after {
-        content: "•";
-        margin: 0 4px;
+    
+    .video-view-count {
+        display: inline-block;
+        white-space: nowrap;
     }
-
+    
+    .video-time {
+        display: flex;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+    }
+    
+    /* Featured section */
     .featured-section {
-        margin-bottom: 48px;
+        margin-bottom: 2rem;
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
     }
-
-    .featured-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 24px;
-    }
-
+    
     .featured-item .thumbnail-container {
-        padding-top: 50%; /* Slightly shorter for featured videos */
+        padding-top: 45%; /* Make featured video shorter */
     }
-
+    
     .featured-item .video-title {
         font-size: 18px;
-        -webkit-line-clamp: 1;
     }
-
-    @media (max-width: 1600px) {
+    
+    /* Sidebar cards */
+    .sidebar-card {
+        background-color: var(--card-bg);
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 .125rem .375rem rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+    }
+    
+    .sidebar-header {
+        padding: 12px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+        background-color: rgba(var(--primary-color-rgb), 0.05);
+    }
+    
+    .sidebar-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0;
+        color: var(--text-color);
+    }
+    
+    .view-all {
+        font-size: 14px;
+        color: var(--primary-color);
+        text-decoration: none;
+    }
+    
+    .sidebar-content {
+        padding: 12px;
+    }
+    
+    .sidebar-video {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border-color);
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.2s;
+    }
+    
+    .sidebar-video:hover {
+        transform: translateY(-2px);
+    }
+    
+    .sidebar-video:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+    
+    .sidebar-thumbnail {
+        width: 120px;
+        height: 68px;
+        border-radius: 8px;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+    
+    .sidebar-video-info {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .sidebar-video-title {
+        font-size: 14px;
+        font-weight: 500;
+        margin: 0 0 4px 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        color: var(--text-color);
+    }
+    
+    .sidebar-video-channel {
+        font-size: 12px;
+        color: var(--light-text);
+        margin-bottom: 2px;
+    }
+    
+    .sidebar-video-stats {
+        font-size: 12px;
+        color: var(--light-text);
+    }
+    
+    .sidebar-empty {
+        padding: 24px 16px;
+        text-align: center;
+        color: var(--light-text);
+    }
+    
+    .sidebar-empty-icon {
+        font-size: 24px;
+        margin-bottom: 8px;
+        color: var(--primary-color);
+    }
+    
+    .clear-history {
+        display: block;
+        text-align: center;
+        font-size: 14px;
+        color: var(--primary-color);
+        margin-top: 8px;
+        text-decoration: none;
+    }
+    
+    .clear-history:hover {
+        color: var(--dark-color);
+    }
+    
+    /* Media queries for responsive grid */
+    @media (min-width: 1800px) {
+        .video-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+    
+    @media (max-width: 1400px) {
         .video-grid {
             grid-template-columns: repeat(3, 1fr);
         }
+        .video-title {
+            font-size: 13px;
+            -webkit-line-clamp: 2;
+        }
     }
-
-    @media (max-width: 1200px) {
+    
+    @media (max-width: 1000px) {
         .video-grid {
             grid-template-columns: repeat(2, 1fr);
         }
-        .featured-grid {
-            grid-template-columns: 1fr;
-        }
     }
-
-    @media (max-width: 768px) {
+    
+    @media (max-width: 700px) {
         .video-grid {
             grid-template-columns: 1fr;
         }
+        
+        .sidebar {
+            position: static;
+            height: auto;
+            padding-top: 0;
+        }
+        
+        main {
+            padding-top: 1rem;
+        }
+    }
+    
+    /* Toggle button styling */
+    #sidebarToggle {
+        background-color: transparent;
+        color: var(--primary-color);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        transition: all 0.2s;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    #sidebarToggle:hover {
+        background-color: rgba(var(--primary-color-rgb), 0.1);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    #sidebarToggle i {
+        font-size: 1.25rem;
+    }
+    
+    /* Make section headings slightly larger */
+    .mb-3 h2.h4 {
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Sidebar toggle top position */
+    .sidebar-toggle-top {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        z-index: 1000;
+    }
+    
+    /* Additional space for navigation to prevent overlap */
+    .nav.flex-column {
+        margin-top: 45px !important;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="main-content">
-    {% if featured_video %}
-    <div class="featured-section">
-        <div class="section-header">
-            <h2 class="section-title">Featured Video</h2>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+            <div class="position-sticky pt-4">
+                <button id="sidebarToggle" class="btn btn-sm sidebar-toggle-top">
+                    <i class="bi bi-list"></i>
+                </button>
+                
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'home' %}">
+                            <i class="bi bi-house-door"></i>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'your_videos' %}">
+                            <i class="bi bi-collection-play"></i>
+                            <span>Your Videos</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'watch_history' %}">
+                            <i class="bi bi-clock-history"></i>
+                            <span>Watch History</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'saved_videos' %}">
+                            <i class="bi bi-bookmark"></i>
+                            <span>Saved Videos</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'liked_videos' %}">
+                            <i class="bi bi-heart"></i>
+                            <span>Liked Videos</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% if not user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            <span>Login</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register' %}">
+                            <i class="bi bi-person-plus"></i>
+                            <span>Register</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
-        <div class="featured-grid">
-            <a href="{% url 'video-detail' featured_video.id %}" class="video-item featured-item">
-                <div class="thumbnail-container">
-                    <img src="{{ featured_video.thumbnail.url }}" class="video-thumbnail" alt="{{ featured_video.title }}">
-                    <div class="video-duration">{{ featured_video.format_duration }}</div>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 page-header">
+                <div class="d-flex align-items-center">
+                    <h1 class="h2">Home</h1>
                 </div>
-                <div class="video-info">
-                    <img src="{{ featured_video.author.userprofile.profile_picture.url }}" class="channel-avatar" alt="{{ featured_video.author.username }}">
-                    <div class="video-details">
-                        <h3 class="video-title">{{ featured_video.title }}</h3>
-                        <div class="video-metadata">
-                            <div class="channel-name">{{ featured_video.author.username }}</div>
-                            <div class="video-stats">
-                                {{ featured_video.views }} views
-                                <span>{{ featured_video.date_posted|timesince }} ago</span>
+            </div>
+            
+            <div class="content-area">
+                {% if featured_video %}
+                <div class="featured-section">
+                    <div class="mb-3">
+                        <h2 class="h4 text-dark">Featured Video</h2>
+                    </div>
+                    <div class="card modern-card shadow-sm">
+                        <div class="card-body p-0">
+                            <a href="{% url 'video-detail' featured_video.id %}" class="video-item featured-item">
+                                <div class="thumbnail-container">
+                                    <img src="{{ featured_video.thumbnail.url }}" class="video-thumbnail" alt="{{ featured_video.title }}" loading="lazy">
+                                    <div class="video-duration">{{ featured_video.format_duration }}</div>
+                                </div>
+                                <div class="video-info p-3">
+                                    <img src="{{ featured_video.author.userprofile.profile_picture.url }}" class="channel-avatar" alt="{{ featured_video.author.username }}">
+                                    <div class="video-details">
+                                        <h3 class="video-title">{{ featured_video.title }}</h3>
+                                        <div class="video-metadata">
+                                            <div class="channel-name">{{ featured_video.author.username }}</div>
+                                            <div class="video-stats">
+                                                <div class="video-view-count">{{ featured_video.views }} views</div>
+                                                <div class="video-time">{{ featured_video.date_posted|timesince }} ago</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <!-- Skeleton loading for featured video when none is loaded yet -->
+                <div id="skeleton-loader-featured" class="featured-section">
+                    <div class="mb-3">
+                        <h2 class="h4 text-dark">Featured Video</h2>
+                    </div>
+                    <div class="skeleton-card">
+                        <div class="skeleton-thumbnail skeleton" style="padding-top: 45%;"></div>
+                        <div class="skeleton-info d-flex">
+                            <div class="skeleton-avatar skeleton"></div>
+                            <div class="w-100">
+                                <div class="skeleton-title skeleton"></div>
+                                <div class="skeleton-meta skeleton"></div>
+                                <div class="skeleton-meta-2 skeleton"></div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </a>
-        </div>
-    </div>
-    {% endif %}
+                {% endif %}
 
-    <div class="section-header">
-        <h2 class="section-title">Recent Videos</h2>
-    </div>
-    <div class="video-grid">
-        {% for video in latest_videos %}
-        <a href="{% url 'video-detail' video.id %}" class="video-item">
-            <div class="thumbnail-container">
-                <img src="{{ video.thumbnail.url }}" class="video-thumbnail" alt="{{ video.title }}">
-                <div class="video-duration">{{ video.format_duration }}</div>
-            </div>
-            <div class="video-info">
-                <img src="{{ video.author.userprofile.profile_picture.url }}" class="channel-avatar" alt="{{ video.author.username }}">
-                <div class="video-details">
-                    <h3 class="video-title">{{ video.title }}</h3>
-                    <div class="video-metadata">
-                        <div class="channel-name">{{ video.author.username }}</div>
-                        <div class="video-stats">
-                            {{ video.views }} views
-                            <span>{{ video.date_posted|timesince }} ago</span>
+                <div class="video-grid-section">
+                    <div class="mb-3">
+                        <h2 class="h4 text-dark">Recent Videos</h2>
+                    </div>
+                    <div class="video-grid">
+                        {% for video in latest_videos %}
+                        <div class="card modern-card shadow-sm h-100">
+                            <div class="card-body p-0">
+                                <a href="{% url 'video-detail' video.id %}" class="video-item">
+                                    <div class="thumbnail-container">
+                                        <img src="{{ video.thumbnail.url }}" class="video-thumbnail" alt="{{ video.title }}" loading="lazy">
+                                        <div class="video-duration">{{ video.format_duration }}</div>
+                                    </div>
+                                    <div class="video-info">
+                                        <img src="{{ video.author.userprofile.profile_picture.url }}" class="channel-avatar" alt="{{ video.author.username }}">
+                                        <div class="video-details">
+                                            <h3 class="video-title">{{ video.title }}</h3>
+                                            <div class="video-metadata">
+                                                <div class="channel-name">{{ video.author.username }}</div>
+                                                <div class="video-stats">
+                                                    <div class="video-view-count">{{ video.views }} views</div>
+                                                    <div class="video-time">{{ video.date_posted|timesince }} ago</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
                         </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Skeleton Loading Template (hidden when content is loaded) -->
+                    <div id="skeleton-loader-recent" class="video-grid" style="display: none;">
+                        {% for i in "1234" %}
+                        <div class="skeleton-card">
+                            <div class="skeleton-thumbnail skeleton"></div>
+                            <div class="skeleton-info">
+                                <div class="skeleton-avatar skeleton"></div>
+                                <div class="skeleton-title skeleton"></div>
+                                <div class="skeleton-meta skeleton"></div>
+                                <div class="skeleton-meta-2 skeleton"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="video-grid-section">
+                    <div class="mb-3">
+                        <h2 class="h4 text-dark">Popular Videos</h2>
+                    </div>
+                    <div class="video-grid">
+                        {% for video in popular_videos %}
+                        <div class="card modern-card shadow-sm h-100">
+                            <div class="card-body p-0">
+                                <a href="{% url 'video-detail' video.id %}" class="video-item">
+                                    <div class="thumbnail-container">
+                                        <img src="{{ video.thumbnail.url }}" class="video-thumbnail" alt="{{ video.title }}" loading="lazy">
+                                        <div class="video-duration">{{ video.format_duration }}</div>
+                                    </div>
+                                    <div class="video-info">
+                                        <img src="{{ video.author.userprofile.profile_picture.url }}" class="channel-avatar" alt="{{ video.author.username }}">
+                                        <div class="video-details">
+                                            <h3 class="video-title">{{ video.title }}</h3>
+                                            <div class="video-metadata">
+                                                <div class="channel-name">{{ video.author.username }}</div>
+                                                <div class="video-stats">
+                                                    <div class="video-view-count">{{ video.views }} views</div>
+                                                    <div class="video-time">{{ video.date_posted|timesince }} ago</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Skeleton Loading Template (hidden when content is loaded) -->
+                    <div id="skeleton-loader-popular" class="video-grid" style="display: none;">
+                        {% for i in "1234" %}
+                        <div class="skeleton-card">
+                            <div class="skeleton-thumbnail skeleton"></div>
+                            <div class="skeleton-info">
+                                <div class="skeleton-avatar skeleton"></div>
+                                <div class="skeleton-title skeleton"></div>
+                                <div class="skeleton-meta skeleton"></div>
+                                <div class="skeleton-meta-2 skeleton"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
-        </a>
-        {% endfor %}
-    </div>
+            
+            {% if user.is_authenticated %}
+            <div class="right-sidebar">
+                <div class="sidebar-card">
+                    <div class="sidebar-header">
+                        <h3 class="sidebar-title">Watch History</h3>
+                        <a href="{% url 'watch_history' %}" class="view-all">View All</a>
+                    </div>
+                    <div class="sidebar-content">
+                        {% if watch_history %}
+                            {% for item in watch_history %}
+                            <a href="{% url 'video-detail' item.video.id %}" class="sidebar-video">
+                                <img src="{{ item.video.thumbnail.url }}" class="sidebar-thumbnail" alt="{{ item.video.title }}">
+                                <div class="sidebar-video-info">
+                                    <h4 class="sidebar-video-title">{{ item.video.title }}</h4>
+                                    <div class="sidebar-video-channel">{{ item.video.author.username }}</div>
+                                    <div class="sidebar-video-stats">{{ item.video.views }} views • {{ item.watched_at|timesince }} ago</div>
+                                </div>
+                            </a>
+                            {% endfor %}
+                            <a href="{% url 'clear_watch_history' %}" class="clear-history" onclick="return confirm('Are you sure you want to clear your watch history?')">
+                                <i class="bi bi-trash"></i> Clear history
+                            </a>
+                        {% else %}
+                            <div class="sidebar-empty">
+                                <div class="sidebar-empty-icon"><i class="bi bi-clock-history"></i></div>
+                                <p>Your watch history is empty</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
 
-    <div class="section-header">
-        <h2 class="section-title">Popular Videos</h2>
-    </div>
-    <div class="video-grid">
-        {% for video in popular_videos %}
-        <a href="{% url 'video-detail' video.id %}" class="video-item">
-            <div class="thumbnail-container">
-                <img src="{{ video.thumbnail.url }}" class="video-thumbnail" alt="{{ video.title }}">
-                <div class="video-duration">{{ video.format_duration }}</div>
-            </div>
-            <div class="video-info">
-                <img src="{{ video.author.userprofile.profile_picture.url }}" class="channel-avatar" alt="{{ video.author.username }}">
-                <div class="video-details">
-                    <h3 class="video-title">{{ video.title }}</h3>
-                    <div class="video-metadata">
-                        <div class="channel-name">{{ video.author.username }}</div>
-                        <div class="video-stats">
-                            {{ video.views }} views
-                            <span>{{ video.date_posted|timesince }} ago</span>
-                        </div>
+                <div class="sidebar-card">
+                    <div class="sidebar-header">
+                        <h3 class="sidebar-title">Saved Videos</h3>
+                        <a href="{% url 'saved_videos' %}" class="view-all">View All</a>
+                    </div>
+                    <div class="sidebar-content">
+                        {% if saved_videos %}
+                            {% for item in saved_videos %}
+                            <a href="{% url 'video-detail' item.video.id %}" class="sidebar-video">
+                                <img src="{{ item.video.thumbnail.url }}" class="sidebar-thumbnail" alt="{{ item.video.title }}">
+                                <div class="sidebar-video-info">
+                                    <h4 class="sidebar-video-title">{{ item.video.title }}</h4>
+                                    <div class="sidebar-video-channel">{{ item.video.author.username }}</div>
+                                    <div class="sidebar-video-stats">{{ item.video.views }} views • Saved {{ item.saved_at|timesince }} ago</div>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        {% else %}
+                            <div class="sidebar-empty">
+                                <div class="sidebar-empty-icon"><i class="bi bi-bookmark"></i></div>
+                                <p>No saved videos yet</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-header">
+                        <h3 class="sidebar-title">Liked Videos</h3>
+                        <a href="{% url 'liked_videos' %}" class="view-all">View All</a>
+                    </div>
+                    <div class="sidebar-content">
+                        {% if liked_videos %}
+                            {% for video in liked_videos %}
+                            <a href="{% url 'video-detail' video.id %}" class="sidebar-video">
+                                <img src="{{ video.thumbnail.url }}" class="sidebar-thumbnail" alt="{{ video.title }}">
+                                <div class="sidebar-video-info">
+                                    <h4 class="sidebar-video-title">{{ video.title }}</h4>
+                                    <div class="sidebar-video-channel">{{ video.author.username }}</div>
+                                    <div class="sidebar-video-stats">{{ video.views }} views</div>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        {% else %}
+                            <div class="sidebar-empty">
+                                <div class="sidebar-empty-icon"><i class="bi bi-heart"></i></div>
+                                <p>No liked videos yet</p>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
-        </a>
-        {% endfor %}
+            {% endif %}
+        </main>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('main');
+        
+        // Check if the sidebar is collapsed in localStorage
+        const isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        
+        // Apply the initial state
+        if (isSidebarCollapsed) {
+            sidebar.classList.add('collapsed');
+            mainContent.classList.add('expanded');
+        }
+        
+        // Update the toggle button icon
+        function updateToggleIcon() {
+            const icon = sidebarToggle.querySelector('i');
+            if (sidebar.classList.contains('collapsed')) {
+                icon.classList.remove('bi-list');
+                icon.classList.add('bi-arrow-right-square');
+            } else {
+                icon.classList.remove('bi-arrow-right-square');
+                icon.classList.add('bi-list');
+            }
+        }
+        
+        // Initialize the icon
+        updateToggleIcon();
+        
+        // Add click event to toggle the sidebar
+        sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+            
+            // Save the state to localStorage
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+            
+            // Update the icon
+            updateToggleIcon();
+        });
+        
+        // Remove the collapse behavior from Bootstrap's sidebar elements
+        if (typeof bootstrap !== 'undefined') {
+            const sidebarElement = document.querySelector('.sidebar');
+            if (sidebarElement) {
+                const bsCollapse = bootstrap.Collapse.getInstance(sidebarElement);
+                if (bsCollapse) {
+                    bsCollapse.dispose();
+                }
+            }
+        }
+        
+        // Set links to not trigger sidebar collapses
+        const navLinks = document.querySelectorAll('.sidebar .nav-link');
+        navLinks.forEach(link => {
+            // Remove any data-bs-toggle attributes
+            link.removeAttribute('data-bs-toggle');
+            // Remove any data-bs-target attributes
+            link.removeAttribute('data-bs-target');
+            // Remove any aria-controls attributes
+            link.removeAttribute('aria-controls');
+            // Remove any role="button" attributes
+            link.removeAttribute('role');
+        });
+        
+        // Skeleton loading handling
+        function handleSkeletonLoading() {
+            // Get all the skeleton loaders
+            const skeletonLoaders = [
+                document.getElementById('skeleton-loader-featured'),
+                document.getElementById('skeleton-loader-recent'),
+                document.getElementById('skeleton-loader-popular')
+            ];
+            
+            // Show skeleton loaders before content loads
+            skeletonLoaders.forEach(loader => {
+                if (loader) loader.style.display = 'grid';
+            });
+            
+            // Hide real content initially
+            const videoGrids = document.querySelectorAll('.video-grid');
+            const featuredSection = document.querySelector('.featured-section');
+            
+            // Add content-loading class to all content
+            if (featuredSection && skeletonLoaders[0]) {
+                featuredSection.classList.add('content-loading');
+            }
+            
+            videoGrids.forEach(grid => {
+                grid.classList.add('content-loading');
+            });
+            
+            // After content is loaded, hide skeletons and show content
+            window.addEventListener('load', function() {
+                // Hide skeleton loaders
+                skeletonLoaders.forEach(loader => {
+                    if (loader) {
+                        setTimeout(() => {
+                            loader.style.display = 'none';
+                            
+                            // Show the corresponding content
+                            if (loader.id === 'skeleton-loader-featured' && featuredSection) {
+                                featuredSection.classList.remove('content-loading');
+                                featuredSection.classList.add('content-loaded');
+                            }
+                        }, 300); // Small delay for smooth transition
+                    }
+                });
+                
+                // Show video grids
+                videoGrids.forEach(grid => {
+                    setTimeout(() => {
+                        grid.classList.remove('content-loading');
+                        grid.classList.add('content-loaded');
+                    }, 300);
+                });
+            });
+        }
+        
+        // Initialize skeleton loading
+        handleSkeletonLoading();
+    });
+</script>
 {% endblock %} 

@@ -501,16 +501,16 @@
             {% for video in videos %}
                 <div class="short-video-card" data-video-id="{{ video.id }}">
                     <div class="video-container">
-                        <div class="video-content">
-                            <video 
-                                src="{{ video.video_file.url }}"
-                                poster="{{ video.thumbnail.url }}"
-                                loop
-                                muted
-                                playsinline
-                                preload="auto"
-                                class="short-video">
-                            </video>
+                            <div class="video-content">
+                                <video 
+                                    src="{{ video.video_file.url }}"
+                                    poster="{{ video.thumbnail.url }}"
+                                    loop
+                                    muted
+                                    playsinline
+                                    preload="auto"
+                                    class="short-video">
+                                </video>
                             <!-- Video Controls -->
                             <div class="video-controls">
                                 <button class="control-btn play-pause-btn" data-status="paused">
@@ -527,27 +527,27 @@
                             </div>
                             
                             <!-- Video Info -->
-                            <div class="video-overlay">
-                                <div class="video-info">
-                                    <p class="video-description">{{ video.description }}</p>
-                                    <a href="{% url 'user_dashboard' video.author.username %}" class="author-link">
+                                <div class="video-overlay">
+                                    <div class="video-info">
+                                        <p class="video-description">{{ video.description }}</p>
+                                        <a href="{% url 'user_dashboard' video.author.username %}" class="author-link">
                                         <img src="{{ video.author.userprofile.profile_picture.url }}" alt="{{ video.author.username }}" class="author-avatar">
-                                        @{{ video.author.username }}
-                                    </a>
-                                </div>
+                                            @{{ video.author.username }}
+                                        </a>
+                                    </div>
                             </div>
                             
                             <!-- Action Buttons (Like YouTube Shorts) -->
-                            <div class="video-actions">
+                                    <div class="video-actions">
                                 <button class="action-btn like-btn {% if request.user in video.likes.all %}active{% endif %}" data-video-id="{{ video.id }}" data-bs-toggle="tooltip" data-bs-placement="left" title="Like">
-                                    <i class="bi bi-heart-fill"></i>
-                                    <span class="count">{{ video.total_likes }}</span>
-                                </button>
+                                            <i class="bi bi-heart-fill"></i>
+                                            <span class="count">{{ video.total_likes }}</span>
+                                        </button>
                                 <button class="action-btn comment-btn" data-video-id="{{ video.id }}" data-bs-toggle="tooltip" data-bs-placement="left" title="Comments">
-                                    <i class="bi bi-chat-fill"></i>
-                                    <span class="count">{{ video.comments.count }}</span>
-                                </button>
-                            </div>
+                                            <i class="bi bi-chat-fill"></i>
+                                            <span class="count">{{ video.comments.count }}</span>
+                                        </button>
+                                    </div>
                         </div>
                     </div>
                 </div>
@@ -591,27 +591,27 @@
 
 {% block scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
         // Add shorts-view class to body
         document.body.classList.add('shorts-view');
         
-        const videos = document.querySelectorAll('.short-video');
-        const shortsContainer = document.querySelector('.shorts-container');
-        const commentsSection = document.querySelector('.comments-section');
-        const closeCommentsBtn = document.querySelector('.close-comments');
-        let currentVideoIndex = 0;
+    const videos = document.querySelectorAll('.short-video');
+    const shortsContainer = document.querySelector('.shorts-container');
+    const commentsSection = document.querySelector('.comments-section');
+    const closeCommentsBtn = document.querySelector('.close-comments');
+    let currentVideoIndex = 0;
         
         // Initialize Bootstrap tooltips
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         const tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
-        
-        // Function to play a video
-        function playVideo(video) {
-            video.play().catch(error => {
-                console.log("Auto-play prevented:", error);
-            });
+    
+    // Function to play a video
+    function playVideo(video) {
+        video.play().catch(error => {
+            console.log("Auto-play prevented:", error);
+        });
             
             // Update play/pause button
             const videoCard = video.closest('.short-video-card');
@@ -622,11 +622,11 @@
                     playPauseBtn.querySelector('i').className = 'bi bi-pause-fill';
                 }
             }
-        }
-        
-        // Function to pause a video
-        function pauseVideo(video) {
-            video.pause();
+    }
+    
+    // Function to pause a video
+    function pauseVideo(video) {
+        video.pause();
             
             // Update play/pause button
             const videoCard = video.closest('.short-video-card');
@@ -684,17 +684,17 @@
             });
         });
 
-        // Play the first video immediately
-        if (videos.length > 0) {
-            playVideo(videos[0]);
-        }
+    // Play the first video immediately
+    if (videos.length > 0) {
+        playVideo(videos[0]);
+    }
 
-        // Create an Intersection Observer to handle video playback
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                const video = entry.target;
-                if (entry.isIntersecting) {
-                    playVideo(video);
+    // Create an Intersection Observer to handle video playback
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            const video = entry.target;
+            if (entry.isIntersecting) {
+                playVideo(video);
                     // Update current video index
                     const videoCards = document.querySelectorAll('.short-video-card');
                     videoCards.forEach((card, index) => {
@@ -702,94 +702,94 @@
                             currentVideoIndex = index;
                         }
                     });
-                } else {
-                    pauseVideo(video);
-                }
-            });
-        }, {
-            threshold: 0.8
+            } else {
+                pauseVideo(video);
+            }
         });
+    }, {
+        threshold: 0.8
+    });
 
-        // Observe all videos
-        videos.forEach(video => {
-            observer.observe(video);
-        });
+    // Observe all videos
+    videos.forEach(video => {
+        observer.observe(video);
+    });
 
-        // Handle likes
-        const likeBtns = document.querySelectorAll('.like-btn');
-        likeBtns.forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const videoId = btn.dataset.videoId;
-                try {
-                    const response = await fetch(`/video/${videoId}/like/`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': getCookie('csrftoken')
-                        }
-                    });
-                    const data = await response.json();
-                    if (data.liked) {
-                        btn.classList.add('active');
-                    } else {
-                        btn.classList.remove('active');
+    // Handle likes
+    const likeBtns = document.querySelectorAll('.like-btn');
+    likeBtns.forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const videoId = btn.dataset.videoId;
+            try {
+                const response = await fetch(`/video/${videoId}/like/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
                     }
-                    btn.querySelector('.count').textContent = data.total_likes;
-                } catch (error) {
-                    console.error('Error:', error);
+                });
+                const data = await response.json();
+                if (data.liked) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
                 }
-            });
+                btn.querySelector('.count').textContent = data.total_likes;
+            } catch (error) {
+                console.error('Error:', error);
+            }
         });
+    });
 
-        // Handle comments section
-        const commentBtns = document.querySelectorAll('.comment-btn');
-        const commentForm = document.querySelector('.comment-form');
-        const commentInput = document.querySelector('.comment-input');
-        const postCommentBtn = document.querySelector('.post-comment-btn');
-        let currentVideoId = null;
+    // Handle comments section
+    const commentBtns = document.querySelectorAll('.comment-btn');
+    const commentForm = document.querySelector('.comment-form');
+    const commentInput = document.querySelector('.comment-input');
+    const postCommentBtn = document.querySelector('.post-comment-btn');
+    let currentVideoId = null;
 
-        function formatTimestamp(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            const diffInSeconds = Math.floor((now - date) / 1000);
-            
-            if (diffInSeconds < 60) return 'Just now';
-            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
-            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
-            if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`;
-            if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)} months ago`;
-            return `${Math.floor(diffInSeconds / 31536000)} years ago`;
-        }
+    function formatTimestamp(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+        
+        if (diffInSeconds < 60) return 'Just now';
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+        if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+        if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)} months ago`;
+        return `${Math.floor(diffInSeconds / 31536000)} years ago`;
+    }
 
-        function createCommentHTML(comment) {
-            const repliesHTML = comment.replies ? comment.replies.map(reply => `
-                <div class="reply-item">
-                    <img src="${reply.author_profile_picture || '/static/images/default-avatar.png'}" 
-                         alt="${reply.author}" 
-                         class="comment-avatar">
-                    <div class="comment-content">
-                        <div class="comment-author">@${reply.author}</div>
-                        <div class="comment-text">${reply.content}</div>
-                        <div class="comment-metadata">
-                            ${formatTimestamp(reply.date_posted)}
+    function createCommentHTML(comment) {
+        const repliesHTML = comment.replies ? comment.replies.map(reply => `
+            <div class="reply-item">
+                <img src="${reply.author_profile_picture || '/static/images/default-avatar.png'}" 
+                     alt="${reply.author}" 
+                     class="comment-avatar">
+                <div class="comment-content">
+                    <div class="comment-author">@${reply.author}</div>
+                    <div class="comment-text">${reply.content}</div>
+                    <div class="comment-metadata">
+                        ${formatTimestamp(reply.date_posted)}
                             <button class="action-link like-comment ${reply.is_liked ? 'active' : ''}" data-comment-id="${reply.id}">
                                 <i class="bi bi-hand-thumbs-up${reply.is_liked ? '-fill' : ''}"></i>
                                 <span class="like-count">${reply.likes_count || 0}</span>
                             </button>
-                        </div>
                     </div>
                 </div>
-            `).join('') : '';
+            </div>
+        `).join('') : '';
 
-            return `
-                <div class="comment-item" data-comment-id="${comment.id}">
-                    <img src="${comment.author_profile_picture || '/static/images/default-avatar.png'}" 
-                         alt="${comment.author}" 
-                         class="comment-avatar">
-                    <div class="comment-content">
-                        <div class="comment-author">@${comment.author}</div>
-                        <div class="comment-text">${comment.content}</div>
-                        <div class="comment-metadata">
-                            ${formatTimestamp(comment.date_posted)}
+        return `
+            <div class="comment-item" data-comment-id="${comment.id}">
+                <img src="${comment.author_profile_picture || '/static/images/default-avatar.png'}" 
+                     alt="${comment.author}" 
+                     class="comment-avatar">
+                <div class="comment-content">
+                    <div class="comment-author">@${comment.author}</div>
+                    <div class="comment-text">${comment.content}</div>
+                    <div class="comment-metadata">
+                        ${formatTimestamp(comment.date_posted)}
                         </div>
                         <div class="comment-actions">
                             <button class="action-link like-comment ${comment.is_liked ? 'active' : ''}" data-comment-id="${comment.id}">
@@ -800,217 +800,217 @@
                                 <i class="bi bi-reply"></i>
                                 Reply
                             </button>
-                        </div>
-                        <div class="reply-form" id="reply-form-${comment.id}">
-                            <textarea class="reply-input" placeholder="Write a reply..."></textarea>
+                    </div>
+                    <div class="reply-form" id="reply-form-${comment.id}">
+                        <textarea class="reply-input" placeholder="Write a reply..."></textarea>
                             <div class="mt-2">
-                                <button class="btn btn-primary btn-sm post-reply-btn">Reply</button>
-                                <button class="btn btn-light btn-sm cancel-reply-btn">Cancel</button>
+                        <button class="btn btn-primary btn-sm post-reply-btn">Reply</button>
+                        <button class="btn btn-light btn-sm cancel-reply-btn">Cancel</button>
                             </div>
-                        </div>
-                        <div class="replies-container" id="replies-${comment.id}">
-                            ${repliesHTML}
-                        </div>
+                    </div>
+                    <div class="replies-container" id="replies-${comment.id}">
+                        ${repliesHTML}
                     </div>
                 </div>
-            `;
-        }
+            </div>
+        `;
+    }
 
-        async function loadComments(videoId) {
+    async function loadComments(videoId) {
+        try {
+            const response = await fetch(`/video/${videoId}/comments/`);
+            if (!response.ok) throw new Error('Failed to load comments');
+            const data = await response.json();
+            
+            const commentsContainer = document.querySelector('.comments-container');
+            commentsContainer.innerHTML = data.comments.length ? 
+                data.comments.map(comment => createCommentHTML(comment)).join('') :
+                '<p class="text-center text-muted mt-4">No comments yet. Be the first to comment!</p>';
+            
+            // Update comment count in the video actions
+            const commentBtn = document.querySelector(`.comment-btn[data-video-id="${videoId}"] .count`);
+            if (commentBtn) commentBtn.textContent = data.comments.length;
+            
+            // Add event listeners to new comment buttons
+            attachCommentEventListeners();
+        } catch (error) {
+            console.error('Error loading comments:', error);
+        }
+    }
+
+    function attachCommentEventListeners() {
+        // Like buttons for comments
+        document.querySelectorAll('.like-comment').forEach(btn => {
+            btn.onclick = async (e) => {
+                e.preventDefault();
+                const commentId = btn.dataset.commentId;
+                try {
+                    const response = await fetch(`/comment/${commentId}/like/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        }
+                    });
+                    const data = await response.json();
+                    const icon = btn.querySelector('i');
+                    const count = btn.querySelector('.like-count');
+                    
+                    if (data.liked) {
+                        icon.classList.remove('bi-hand-thumbs-up');
+                        icon.classList.add('bi-hand-thumbs-up-fill');
+                    } else {
+                        icon.classList.remove('bi-hand-thumbs-up-fill');
+                        icon.classList.add('bi-hand-thumbs-up');
+                    }
+                    count.textContent = data.likes;
+                } catch (error) {
+                    console.error('Error liking comment:', error);
+                }
+            };
+        });
+    }
+
+    commentBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentVideoId = btn.dataset.videoId;
+            commentsSection.classList.add('active');
+            loadComments(currentVideoId);
+        });
+    });
+
+    // Handle comment submission
+    if (postCommentBtn) {
+        postCommentBtn.addEventListener('click', async () => {
+            if (!commentInput.value.trim() || !currentVideoId) return;
+
             try {
-                const response = await fetch(`/video/${videoId}/comments/`);
-                if (!response.ok) throw new Error('Failed to load comments');
+                const response = await fetch(`/video/${currentVideoId}/comment/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        content: commentInput.value.trim()
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to post comment');
                 const data = await response.json();
-                
+
+                // Add the new comment to the top of the comments container
                 const commentsContainer = document.querySelector('.comments-container');
-                commentsContainer.innerHTML = data.comments.length ? 
-                    data.comments.map(comment => createCommentHTML(comment)).join('') :
-                    '<p class="text-center text-muted mt-4">No comments yet. Be the first to comment!</p>';
+                const newCommentHTML = createCommentHTML(data.comment);
+                commentsContainer.insertAdjacentHTML('afterbegin', newCommentHTML);
+
+                // Update comment count
+                const commentBtn = document.querySelector(`.comment-btn[data-video-id="${currentVideoId}"] .count`);
+                if (commentBtn) {
+                    commentBtn.textContent = parseInt(commentBtn.textContent || 0) + 1;
+                }
+
+                // Clear input
+                commentInput.value = '';
                 
-                // Update comment count in the video actions
-                const commentBtn = document.querySelector(`.comment-btn[data-video-id="${videoId}"] .count`);
-                if (commentBtn) commentBtn.textContent = data.comments.length;
-                
-                // Add event listeners to new comment buttons
+                // Reattach event listeners
                 attachCommentEventListeners();
             } catch (error) {
-                console.error('Error loading comments:', error);
+                console.error('Error posting comment:', error);
             }
-        }
-
-        function attachCommentEventListeners() {
-            // Like buttons for comments
-            document.querySelectorAll('.like-comment').forEach(btn => {
-                btn.onclick = async (e) => {
-                    e.preventDefault();
-                    const commentId = btn.dataset.commentId;
-                    try {
-                        const response = await fetch(`/comment/${commentId}/like/`, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRFToken': getCookie('csrftoken')
-                            }
-                        });
-                        const data = await response.json();
-                        const icon = btn.querySelector('i');
-                        const count = btn.querySelector('.like-count');
-                        
-                        if (data.liked) {
-                            icon.classList.remove('bi-hand-thumbs-up');
-                            icon.classList.add('bi-hand-thumbs-up-fill');
-                        } else {
-                            icon.classList.remove('bi-hand-thumbs-up-fill');
-                            icon.classList.add('bi-hand-thumbs-up');
-                        }
-                        count.textContent = data.likes;
-                    } catch (error) {
-                        console.error('Error liking comment:', error);
-                    }
-                };
-            });
-        }
-
-        commentBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                currentVideoId = btn.dataset.videoId;
-                commentsSection.classList.add('active');
-                loadComments(currentVideoId);
-            });
         });
+    }
 
-        // Handle comment submission
-        if (postCommentBtn) {
-            postCommentBtn.addEventListener('click', async () => {
-                if (!commentInput.value.trim() || !currentVideoId) return;
+    // Close comments section
+    closeCommentsBtn.addEventListener('click', () => {
+        commentsSection.classList.remove('active');
+        currentVideoId = null;
+    });
 
-                try {
-                    const response = await fetch(`/video/${currentVideoId}/comment/`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': getCookie('csrftoken')
-                        },
-                        body: JSON.stringify({
-                            content: commentInput.value.trim()
-                        })
-                    });
-
-                    if (!response.ok) throw new Error('Failed to post comment');
-                    const data = await response.json();
-
-                    // Add the new comment to the top of the comments container
-                    const commentsContainer = document.querySelector('.comments-container');
-                    const newCommentHTML = createCommentHTML(data.comment);
-                    commentsContainer.insertAdjacentHTML('afterbegin', newCommentHTML);
-
-                    // Update comment count
-                    const commentBtn = document.querySelector(`.comment-btn[data-video-id="${currentVideoId}"] .count`);
-                    if (commentBtn) {
-                        commentBtn.textContent = parseInt(commentBtn.textContent || 0) + 1;
-                    }
-
-                    // Clear input
-                    commentInput.value = '';
-                    
-                    // Reattach event listeners
-                    attachCommentEventListeners();
-                } catch (error) {
-                    console.error('Error posting comment:', error);
-                }
-            });
-        }
-
-        // Close comments section
-        closeCommentsBtn.addEventListener('click', () => {
-            commentsSection.classList.remove('active');
-            currentVideoId = null;
-        });
-
-        // Helper function to get CSRF token
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
                 }
             }
-            return cookieValue;
+        }
+        return cookieValue;
+    }
+
+    // Add this after the postCommentBtn event listener
+    document.addEventListener('click', async (e) => {
+        // Reply button click handler
+        if (e.target.closest('.reply-btn')) {
+            const btn = e.target.closest('.reply-btn');
+            const commentId = btn.dataset.commentId;
+            const replyForm = document.querySelector(`#reply-form-${commentId}`);
+            replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
         }
 
-        // Add this after the postCommentBtn event listener
-        document.addEventListener('click', async (e) => {
-            // Reply button click handler
-            if (e.target.closest('.reply-btn')) {
-                const btn = e.target.closest('.reply-btn');
-                const commentId = btn.dataset.commentId;
-                const replyForm = document.querySelector(`#reply-form-${commentId}`);
-                replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
-            }
+        // Cancel reply button click handler
+        if (e.target.closest('.cancel-reply-btn')) {
+            const btn = e.target.closest('.cancel-reply-btn');
+            const replyForm = btn.closest('.reply-form');
+            replyForm.style.display = 'none';
+        }
 
-            // Cancel reply button click handler
-            if (e.target.closest('.cancel-reply-btn')) {
-                const btn = e.target.closest('.cancel-reply-btn');
-                const replyForm = btn.closest('.reply-form');
-                replyForm.style.display = 'none';
-            }
+        // Post reply button click handler
+        if (e.target.closest('.post-reply-btn')) {
+            const btn = e.target.closest('.post-reply-btn');
+            const replyForm = btn.closest('.reply-form');
+            const commentId = replyForm.id.replace('reply-form-', '');
+            const replyInput = replyForm.querySelector('.reply-input');
+            const content = replyInput.value.trim();
 
-            // Post reply button click handler
-            if (e.target.closest('.post-reply-btn')) {
-                const btn = e.target.closest('.post-reply-btn');
-                const replyForm = btn.closest('.reply-form');
-                const commentId = replyForm.id.replace('reply-form-', '');
-                const replyInput = replyForm.querySelector('.reply-input');
-                const content = replyInput.value.trim();
+            if (!content) return;
 
-                if (!content) return;
+            try {
+                const response = await fetch(`/comment/${commentId}/reply/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ content })
+                });
 
-                try {
-                    const response = await fetch(`/comment/${commentId}/reply/`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': getCookie('csrftoken')
-                        },
-                        body: JSON.stringify({ content })
-                    });
+                if (!response.ok) throw new Error('Failed to post reply');
+                const data = await response.json();
 
-                    if (!response.ok) throw new Error('Failed to post reply');
-                    const data = await response.json();
-
-                    if (data.success) {
-                        const repliesContainer = document.querySelector(`#replies-${commentId}`);
-                        const replyHTML = `
-                            <div class="reply-item">
-                                <img src="${data.reply.author_profile_picture}" 
-                                     alt="${data.reply.author}" 
-                                     class="comment-avatar">
-                                <div class="comment-content">
-                                    <div class="comment-author">@${data.reply.author}</div>
-                                    <div class="comment-text">${data.reply.content}</div>
-                                    <div class="comment-metadata">
-                                        Just now
+                if (data.success) {
+                    const repliesContainer = document.querySelector(`#replies-${commentId}`);
+                    const replyHTML = `
+                        <div class="reply-item">
+                            <img src="${data.reply.author_profile_picture}" 
+                                 alt="${data.reply.author}" 
+                                 class="comment-avatar">
+                            <div class="comment-content">
+                                <div class="comment-author">@${data.reply.author}</div>
+                                <div class="comment-text">${data.reply.content}</div>
+                                <div class="comment-metadata">
+                                    Just now
                                         <button class="action-link like-comment" data-comment-id="${data.reply.id}">
                                             <i class="bi bi-hand-thumbs-up"></i>
                                             <span class="like-count">0</span>
                                         </button>
-                                    </div>
                                 </div>
                             </div>
-                        `;
-                        repliesContainer.insertAdjacentHTML('afterbegin', replyHTML);
-                        replyInput.value = '';
-                        replyForm.style.display = 'none';
-                    }
-                } catch (error) {
-                    console.error('Error posting reply:', error);
+                        </div>
+                    `;
+                    repliesContainer.insertAdjacentHTML('afterbegin', replyHTML);
+                    replyInput.value = '';
+                    replyForm.style.display = 'none';
                 }
+            } catch (error) {
+                console.error('Error posting reply:', error);
             }
-        });
+        }
+    });
 
         // Adjust shorts container based on navbar height
         function adjustShortsPosition() {
@@ -1049,6 +1049,6 @@
         
         // Re-adjust on window resize
         window.addEventListener('resize', adjustShortsPosition);
-    });
+});
 </script>
 {% endblock %} 

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% load static %}
-<html lang="en">
+<html lang="en" {% if user.is_authenticated and user.userprofile.dark_mode %}data-bs-theme="dark"{% endif %}>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.2, maximum-scale=1.2, user-scalable=no">
@@ -15,12 +15,55 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <style>
+        /* 
+         * Note: CSS linter might show errors for Django template tags. 
+         * These are expected and can be ignored as the template tags 
+         * will be processed server-side before being sent to the browser.
+         */
         :root {
-            --primary-color: #fb7299;
-            --secondary-color: #f4f4f5;
-            --dark-color: #18191c;
-            --text-color: #18191c;
-            --light-text: #9499a0;
+            {% if user.is_authenticated %}
+                {% if user.userprofile.theme == 'purple' %}
+                    --primary-color: #7952b3;
+                    --primary-color-rgb: 121, 82, 179;
+                {% elif user.userprofile.theme == 'blue' %}
+                    --primary-color: #375a7f;
+                    --primary-color-rgb: 55, 90, 127;
+                {% elif user.userprofile.theme == 'green' %}
+                    --primary-color: #2ecc71;
+                    --primary-color-rgb: 46, 204, 113;
+                {% elif user.userprofile.theme == 'orange' %}
+                    --primary-color: #e67e22;
+                    --primary-color-rgb: 230, 126, 34;
+                {% else %}
+                    --primary-color: #fb7299;
+                    --primary-color-rgb: 251, 114, 153;
+                {% endif %}
+                
+                {% if user.userprofile.dark_mode %}
+                    --secondary-color: #252525;
+                    --dark-color: #333333;
+                    --text-color: #f5f5f7;
+                    --light-text: #b0b3b8;
+                    --card-bg: #333333;
+                    --border-color: #444444;
+                {% else %}
+                    --secondary-color: #f4f4f5;
+                    --dark-color: #18191c;
+                    --text-color: #18191c;
+                    --light-text: #9499a0;
+                    --card-bg: #ffffff;
+                    --border-color: #e5e5e5;
+                {% endif %}
+            {% else %}
+                --primary-color: #fb7299;
+                --primary-color-rgb: 251, 114, 153;
+                --secondary-color: #f4f4f5;
+                --dark-color: #18191c;
+                --text-color: #18191c;
+                --light-text: #9499a0;
+                --card-bg: #ffffff;
+                --border-color: #e5e5e5;
+            {% endif %}
         }
 
         html, body {
@@ -28,6 +71,7 @@
             padding: 0;
             min-height: 100vh;
             background-color: var(--secondary-color);
+            color: var(--text-color);
         }
 
         #page-container {
@@ -43,7 +87,7 @@
         }
 
         .navbar {
-            background-color: white !important;
+            background-color: var(--card-bg) !important;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             padding: 0.5rem 1rem;
         }
@@ -81,17 +125,18 @@
             width: 100%;
             padding: 0.6rem 1.25rem;
             padding-right: 40px;
-            border: 1px solid #e5e5e5;
+            border: 1px solid var(--border-color);
             border-radius: 25px;
             background-color: var(--secondary-color);
             font-size: 1.2rem;
+            color: var(--text-color);
         }
 
         .search-input:focus {
             outline: none;
-            border-color: #7952b3;
+            border-color: var(--primary-color);
             background-color: white;
-            box-shadow: 0 0 0 2px rgba(121, 82, 179, 0.2);
+            box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
         }
 
         .search-button {
@@ -112,7 +157,7 @@
         }
 
         .search-button:hover {
-            color: #7952b3;
+            color: var(--primary-color);
         }
 
         .profile-section {
@@ -126,8 +171,9 @@
         }
 
         .btn-primary:hover {
-            background-color: #e65c85 !important;
-            border-color: #e65c85 !important;
+            background-color: var(--dark-color) !important;
+            border-color: var(--dark-color) !important;
+            opacity: 0.9;
         }
 
         .video-thumbnail {
@@ -139,15 +185,176 @@
 
         .video-card {
             transition: transform 0.2s;
-            background: white;
+            background: var(--card-bg);
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
         }
 
         .video-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        /* Modern Card Design */
+        .modern-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            background: var(--card-bg);
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .modern-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(var(--primary-color-rgb), 0.1), 0 3px 6px rgba(0,0,0,0.12);
+            filter: brightness(1.03);
+        }
+
+        .modern-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(var(--primary-color-rgb), 0.02), rgba(var(--primary-color-rgb), 0.05));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .modern-card:hover::before {
+            opacity: 1;
+        }
+
+        .modern-card:active {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(var(--primary-color-rgb), 0.15);
+        }
+
+        .modern-card .thumbnail-container {
+            border-radius: 12px 12px 0 0;
+            overflow: hidden;
+        }
+
+        .modern-card .video-thumbnail {
+            transition: transform 0.5s ease;
+        }
+
+        .modern-card:hover .video-thumbnail {
+            transform: scale(1.05);
+        }
+        
+        /* Card content hover effects */
+        .modern-card .video-title {
+            transition: color 0.2s ease;
+        }
+        
+        .modern-card:hover .video-title {
+            color: var(--primary-color);
+        }
+        
+        /* Add a subtle glow effect on hover */
+        .modern-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            box-shadow: 0 0 0 0 rgba(var(--primary-color-rgb), 0);
+            opacity: 0;
+            transition: all 0.5s ease;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .modern-card:hover::after {
+            opacity: 0.6;
+            box-shadow: 0 0 25px 3px rgba(var(--primary-color-rgb), 0.15);
+        }
+
+        /* Skeleton Loading Animation */
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, 
+                rgba(var(--primary-color-rgb), 0.05), 
+                rgba(var(--primary-color-rgb), 0.15), 
+                rgba(var(--primary-color-rgb), 0.05));
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite linear;
+            border-radius: 8px;
+        }
+
+        .skeleton-card {
+            border-radius: 12px;
+            overflow: hidden;
+            height: 100%;
+            transition: opacity 0.5s ease, transform 0.3s ease;
+        }
+
+        .skeleton-thumbnail {
+            padding-top: 56.25%;
+            position: relative;
+            background-color: rgba(var(--primary-color-rgb), 0.08);
+        }
+
+        .skeleton-info {
+            padding: 16px;
+        }
+
+        .skeleton-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: rgba(var(--primary-color-rgb), 0.08);
+            float: left;
+            margin-right: 12px;
+        }
+
+        .skeleton-title {
+            height: 16px;
+            margin-bottom: 8px;
+            background-color: rgba(var(--primary-color-rgb), 0.08);
+        }
+
+        .skeleton-meta {
+            height: 12px;
+            width: 60%;
+            background-color: rgba(var(--primary-color-rgb), 0.08);
+            margin-bottom: 6px;
+        }
+
+        .skeleton-meta-2 {
+            height: 12px;
+            width: 40%;
+            background-color: rgba(var(--primary-color-rgb), 0.08);
+        }
+        
+        /* Content loading transitions */
+        .content-loading {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.5s ease, transform 0.3s ease;
+        }
+        
+        .content-loaded {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .video-info {
@@ -221,11 +428,12 @@
             bottom: 0;
             left: 0;
             width: 100vw;
-            background-color: white;
+            background-color: var(--card-bg);
             padding: 1rem 0;
             box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
             z-index: 1000;
             transform: none !important;
+            border-top: 1px solid var(--border-color);
         }
 
         .footer-nav {
@@ -271,12 +479,30 @@
             transition: transform 0.2s;
         }
 
+        {% if user.is_authenticated %}
+            {% if user.userprofile.theme == 'purple' or user.userprofile.theme == 'blue' or user.userprofile.dark_mode %}
+            .circular-button i {
+                font-size: 3.5rem;
+                color: white;
+                line-height: 0;
+                margin-bottom: -4px;
+            }
+            {% else %}
+            .circular-button i {
+                font-size: 3.5rem;
+                color: black;
+                line-height: 0;
+                margin-bottom: -4px;
+            }
+            {% endif %}
+        {% else %}
         .circular-button i {
             font-size: 3.5rem;
             color: black;
             line-height: 0;
             margin-bottom: -4px;
         }
+        {% endif %}
 
         .circular-button:hover {
             transform: translateX(-50%) scale(1.1);
@@ -431,6 +657,11 @@
             color: var(--light-text);
             font-size: 0.875rem;
         }
+
+        /* Adjust spacing in navbar for the circular button */
+        .footer-nav a:nth-child(3) {
+            margin-top: 20px; /* Space for the upload button */
+        }
     </style>
     {% block styles %}{% endblock %}
 </head>
@@ -439,7 +670,21 @@
         <nav class="navbar navbar-expand-lg navbar-light">
             <div class="container">
                 <a class="navbar-brand" href="{% url 'home' %}">
-                    <img src="/media/Plogo.png" alt="PiliPili" class="d-inline-block" onerror="this.style.display='none'">
+                    {% if user.is_authenticated %}
+                        {% if user.userprofile.theme == 'purple' %}
+                            <img src="/media/Plogo_purple.png" alt="PiliPili" class="d-inline-block" onerror="this.src='/media/Plogo.png'">
+                        {% elif user.userprofile.theme == 'blue' %}
+                            <img src="/media/Plogo_blue.png" alt="PiliPili" class="d-inline-block" onerror="this.src='/media/Plogo.png'">
+                        {% elif user.userprofile.theme == 'green' %}
+                            <img src="/media/Plogo_green.png" alt="PiliPili" class="d-inline-block" onerror="this.src='/media/Plogo.png'">
+                        {% elif user.userprofile.theme == 'orange' %}
+                            <img src="/media/Plogo_orange.png" alt="PiliPili" class="d-inline-block" onerror="this.src='/media/Plogo.png'">
+                        {% else %}
+                            <img src="/media/Plogo.png" alt="PiliPili" class="d-inline-block" onerror="this.style.display='none'">
+                        {% endif %}
+                    {% else %}
+                        <img src="/media/Plogo.png" alt="PiliPili" class="d-inline-block" onerror="this.style.display='none'">
+                    {% endif %}
                 </a>
                 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">

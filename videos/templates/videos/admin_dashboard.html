@@ -9,18 +9,19 @@
 
 {% block styles %}
 <style>
-    /* Purple Theme Styles */
+    /* Theme Variables */
     :root {
-        --primary-purple: #7952b3;
-        --dark-purple: #5a3d99;
-        --light-purple: #9c74d4;
-        --bright-purple: #a64edd;
-        --hover-purple: #8540c7;
+        /* These will be overridden by the base theme variables */
+        --primary-purple: var(--primary-color);
+        --dark-purple: var(--dark-color);
+        --light-purple: var(--primary-color);
+        --bright-purple: var(--primary-color);
+        --hover-purple: var(--primary-color);
     }
     
     /* Badges */
     .badge-light-purple {
-        background-color: #9c74d4;
+        background-color: var(--primary-color);
         color: white;
     }
     
@@ -33,32 +34,35 @@
         z-index: 100;
         padding: 48px 0 0;
         box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
-        background-color: #f8f9fa;
+        background-color: var(--card-bg);
+        width: 250px;
+        transition: all 0.3s ease;
     }
     
-    .sidebar .sidebar-profile {
-        padding: 1rem;
-        margin-bottom: 1rem;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
+    /* Collapsed sidebar styles */
+    .sidebar.collapsed {
+        width: 60px;
+        overflow-x: hidden;
     }
     
-    .sidebar .sidebar-profile img {
-        border: 2px solid var(--light-purple);
+    .sidebar.collapsed .nav-link span {
+        display: none;
     }
     
-    .sidebar .sidebar-profile h6 {
-        margin-bottom: 0;
-        color: var(--dark-purple);
-        font-weight: 600;
+    .sidebar.collapsed .nav-link {
+        text-align: center;
+        padding: 0.75rem 0;
+        justify-content: center;
     }
     
-    .sidebar .sidebar-profile small {
-        color: var(--primary-purple);
+    .sidebar.collapsed .nav-link i {
+        margin-right: 0;
+        font-size: 1.25rem;
     }
     
     .sidebar .nav-link {
         font-weight: 500;
-        color: #333;
+        color: var(--text-color);
         padding: 0.75rem 1.25rem;
         margin: 0.2rem 0.5rem;
         border-radius: 0.25rem;
@@ -68,40 +72,79 @@
     }
     
     .sidebar .nav-link i {
-        color: var(--primary-purple);
+        color: var(--primary-color);
         margin-right: 0.75rem;
         font-size: 1.1rem;
     }
     
     .sidebar .nav-link.active {
-        color: var(--primary-purple) !important;
-        background-color: rgba(121, 82, 179, 0.1);
+        color: var(--primary-color) !important;
+        background-color: rgba(var(--primary-color-rgb), 0.1);
         font-weight: 600;
     }
     
     .sidebar .nav-link.active i {
-        color: var(--dark-purple);
+        color: var(--primary-color);
     }
     
     .sidebar .nav-link:hover {
-        color: var(--dark-purple) !important;
-        background-color: rgba(121, 82, 179, 0.05);
+        color: var(--primary-color) !important;
+        background-color: rgba(var(--primary-color-rgb), 0.05);
     }
     
     /* Main content area */
     main {
         padding-top: 1.5rem;
-        background-color: #f5f5f9;
+        background-color: var(--secondary-color);
+        min-height: 100vh;
+        transition: all 0.3s ease;
     }
     
+    main.expanded {
+        margin-left: 60px !important;
+    }
+    
+    /* Toggle button styling */
+    #sidebarToggle {
+        background-color: transparent;
+        color: var(--primary-color);
+        border: 1px solid rgba(var(--primary-color-rgb), 0.2);
+        border-radius: 4px;
+        transition: all 0.2s;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    #sidebarToggle:hover {
+        background-color: rgba(var(--primary-color-rgb), 0.1);
+        box-shadow: 0 2px 5px rgba(var(--primary-color-rgb), 0.1);
+    }
+    
+    #sidebarToggle i {
+        font-size: 1.25rem;
+    }
+    
+    /* Sidebar toggle top position */
+    .sidebar-toggle-top {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        z-index: 1000;
+    }
+    
+    /* Additional space for navigation to prevent overlap */
+    .nav.flex-column {
+        margin-top: 45px !important;
+    }
+    
+    /* Page header styling */
     .page-header {
-        border-bottom: 2px solid rgba(121, 82, 179, 0.2);
+        border-bottom: 2px solid rgba(var(--primary-color-rgb), 0.2);
         margin-bottom: 1.5rem;
         padding-bottom: 0.75rem;
     }
     
     .page-header h1 {
-        color: var(--dark-purple);
+        color: var(--text-color);
         font-weight: 600;
     }
     
@@ -114,15 +157,15 @@
     
     .card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 15px rgba(90, 61, 153, 0.1) !important;
+        box-shadow: 0 10px 15px rgba(var(--primary-color-rgb), 0.1) !important;
     }
     
     .shadow-sm {
-        box-shadow: 0 .125rem .375rem rgba(90, 61, 153, 0.15) !important;
+        box-shadow: 0 .125rem .375rem rgba(var(--primary-color-rgb), 0.15) !important;
     }
     
     .list-group-item-action:hover {
-        background-color: rgba(121, 82, 179, 0.05);
+        background-color: rgba(var(--primary-color-rgb), 0.05);
     }
     
     .btn-sm {
@@ -132,22 +175,23 @@
     
     .btn-sm:hover {
         transform: translateY(-1px);
-        box-shadow: 0 2px 5px rgba(90, 61, 153, 0.2);
+        box-shadow: 0 2px 5px rgba(var(--primary-color-rgb), 0.2);
     }
     
     /* Custom badges */
     .badge-purple {
-        background-color: var(--primary-purple);
+        background-color: var(--primary-color);
         color: white;
     }
     
     .badge-dark-purple {
-        background-color: var(--dark-purple);
+        background-color: var(--dark-color);
         color: white;
     }
     
     .badge-light-purple {
-        background-color: var(--light-purple);
+        background-color: var(--primary-color);
+        opacity: 0.8;
         color: white;
     }
     
@@ -161,12 +205,66 @@
     }
     
     ::-webkit-scrollbar-thumb {
-        background: var(--light-purple);
+        background: var(--primary-color);
         border-radius: 10px;
     }
     
     ::-webkit-scrollbar-thumb:hover {
-        background: var(--primary-purple);
+        background: var(--primary-color);
+        opacity: 0.9;
+    }
+    
+    /* Special card styles */
+    .stat-card {
+        color: white;
+    }
+    
+    .stat-card-primary {
+        background-color: var(--primary-color);
+    }
+    
+    .stat-card-dark {
+        background-color: var(--dark-color);
+    }
+    
+    .stat-card-light {
+        background-color: var(--primary-color);
+        opacity: 0.8;
+    }
+    
+    .stat-card-bright {
+        background-color: var(--primary-color);
+        opacity: 0.9;
+    }
+    
+    /* Custom headers */
+    .themed-header {
+        border-bottom: 2px solid var(--primary-color);
+    }
+    
+    .themed-title {
+        color: var(--text-color);
+    }
+    
+    .themed-button {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+    
+    .themed-button-outline {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    
+    .themed-badge {
+        background-color: var(--primary-color);
+    }
+    
+    .card-title-with-border {
+        color: var(--text-color);
+        border-left: 4px solid var(--primary-color);
+        padding-left: 10px;
     }
 </style>
 {% endblock %}
@@ -176,14 +274,11 @@
     <div class="row">
         <!-- Sidebar -->
         <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-            <div class="position-sticky pt-3">
-                <div class="sidebar-profile d-flex align-items-center">
-                    <img src="{{ user.userprofile.profile_picture.url }}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;" alt="Admin Profile">
-                    <div>
-                        <h6 class="mb-0">{{ user.username }}</h6>
-                        <small>Administrator</small>
-                    </div>
-                </div>
+            <div class="position-sticky pt-4">
+                <button id="sidebarToggle" class="btn btn-sm sidebar-toggle-top">
+                    <i class="bi bi-list"></i>
+                </button>
+                
                 <ul class="nav flex-column">
                     <li class="nav-item">
                         <a class="nav-link {% if active_tab == 'dashboard' %}active{% endif %}" href="{% url 'admin-dashboard' %}">
@@ -263,7 +358,7 @@
                 </div>
                 
                 <div class="col-md-3 mb-4">
-                    <div class="card text-white h-100" style="background-color: #7952b3;">
+                    <div class="card modern-card stat-card stat-card-primary h-100">
                         <div class="card-body d-flex flex-column">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="card-subtitle mb-0">Total Videos</h6>
@@ -279,7 +374,7 @@
                 </div>
                 
                 <div class="col-md-3 mb-4">
-                    <div class="card text-white h-100" style="background-color: #5a3d99;">
+                    <div class="card modern-card stat-card stat-card-dark h-100">
                         <div class="card-body d-flex flex-column">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="card-subtitle mb-0">Total Users</h6>
@@ -295,7 +390,7 @@
                 </div>
                 
                 <div class="col-md-3 mb-4">
-                    <div class="card text-white h-100" style="background-color: #9c74d4;">
+                    <div class="card modern-card stat-card stat-card-light h-100">
                         <div class="card-body d-flex flex-column">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="card-subtitle mb-0">Pending Reports</h6>
@@ -314,7 +409,7 @@
                 </div>
                 
                 <div class="col-md-3 mb-4">
-                    <div class="card text-white h-100" style="background-color: #8540c7;">
+                    <div class="card modern-card stat-card stat-card-bright h-100">
                         <div class="card-body d-flex flex-column">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="card-subtitle mb-0">Pending Appeals</h6>
@@ -333,7 +428,7 @@
                 </div>
                 
                 <div class="col-md-3 mb-4">
-                    <div class="card text-white h-100" style="background-color: #a64edd;">
+                    <div class="card modern-card text-white h-100" style="background-color: #a64edd;">
                         <div class="card-body d-flex flex-column">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="card-subtitle mb-0">Total Comments</h6>
@@ -352,15 +447,30 @@
             <div class="row mb-4">
                 <!-- Content Distribution Chart -->
                 <div class="col-md-8 mx-auto">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3" style="border-bottom: 2px solid #7952b3;">
-                            <h5 class="card-title mb-0" style="color: #5a3d99;">Content Distribution</h5>
+                    <div class="card modern-card shadow-sm">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 themed-header">
+                            <h5 class="card-title mb-0 themed-title">Content Distribution</h5>
                             <div class="btn-group">
-                                <button type="button" class="btn btn-sm btn-outline-purple" style="color: #7952b3; border-color: #7952b3;">View Details</button>
+                                <button type="button" class="btn btn-sm themed-button-outline">View Details</button>
                             </div>
                         </div>
-                        <div class="card-body" style="min-height: 350px;">
+                        <div class="card-body p-4" style="min-height: 350px;">
                             <canvas id="contentDistributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chart Skeleton Loader (hidden when chart is loaded) -->
+            <div id="skeleton-loader-chart" class="row mb-4" style="display: none;">
+                <div class="col-md-8 mx-auto">
+                    <div class="skeleton-card">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                            <div class="skeleton" style="height: 24px; width: 200px;"></div>
+                            <div class="skeleton" style="height: 30px; width: 100px;"></div>
+                        </div>
+                        <div class="skeleton-info" style="height: 350px;">
+                            <div class="skeleton" style="height: 100%; width: 100%;"></div>
                         </div>
                     </div>
                 </div>
@@ -369,13 +479,13 @@
             <!-- Recent Activity -->
             <div class="row mt-4">
                 <div class="col-12 mb-3">
-                    <h4 class="card-title" style="color: #5a3d99; border-left: 4px solid #7952b3; padding-left: 10px;">Recent Activity</h4>
+                    <h4 class="card-title card-title-with-border">Recent Activity</h4>
                 </div>
                 <div class="col-md-4 mb-4">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3" style="border-bottom: 2px solid #7952b3;">
-                            <h5 class="card-title mb-0" style="color: #5a3d99;">Recent Videos</h5>
-                            <a href="{% url 'admin-videos' %}" class="btn btn-sm" style="background-color: #7952b3; color: white;">View All</a>
+                    <div class="card modern-card shadow-sm h-100">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 themed-header">
+                            <h5 class="card-title mb-0 themed-title">Recent Videos</h5>
+                            <a href="{% url 'admin-videos' %}" class="btn btn-sm themed-button">View All</a>
                         </div>
                         <div class="card-body p-0">
                             <div class="list-group list-group-flush">
@@ -383,7 +493,7 @@
                                 <a href="{% url 'video-detail' video.pk %}" class="list-group-item list-group-item-action">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-shrink-0">
-                                            <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" class="rounded" style="width: 60px; height: 40px; object-fit: cover;">
+                                            <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" class="rounded" style="width: 60px; height: 40px; object-fit: cover;" loading="lazy">
                                         </div>
                                         <div class="ms-3 flex-grow-1">
                                             <h6 class="mb-1 text-truncate">{{ video.title }}</h6>
@@ -402,10 +512,10 @@
                     </div>
                 </div>
                 <div class="col-md-4 mb-4">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3" style="border-bottom: 2px solid #7952b3;">
-                            <h5 class="card-title mb-0" style="color: #5a3d99;">Recent Reports</h5>
-                            <a href="{% url 'manage-reports' %}" class="btn btn-sm" style="background-color: #7952b3; color: white;">Manage</a>
+                    <div class="card modern-card shadow-sm h-100">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 themed-header">
+                            <h5 class="card-title mb-0 themed-title">Recent Reports</h5>
+                            <a href="{% url 'manage-reports' %}" class="btn btn-sm themed-button">Manage</a>
                         </div>
                         <div class="card-body p-0">
                             <div class="list-group list-group-flush">
@@ -413,7 +523,7 @@
                                 <a href="{% url 'handle-report' report.pk %}" class="list-group-item list-group-item-action">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-shrink-0">
-                                            <span class="badge rounded-circle p-2" style="background-color: #9c74d4;"><i class="bi bi-flag-fill"></i></span>
+                                            <span class="badge rounded-circle p-2 themed-badge"><i class="bi bi-flag-fill"></i></span>
                                         </div>
                                         <div class="ms-3 flex-grow-1">
                                             <h6 class="mb-1 text-truncate">{{ report.video.title }}</h6>
@@ -432,10 +542,10 @@
                     </div>
                 </div>
                 <div class="col-md-4 mb-4">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3" style="border-bottom: 2px solid #7952b3;">
-                            <h5 class="card-title mb-0" style="color: #5a3d99;">Recent Appeals</h5>
-                            <a href="{% url 'admin-appeals' %}" class="btn btn-sm" style="background-color: #7952b3; color: white;">Review</a>
+                    <div class="card modern-card shadow-sm h-100">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 themed-header">
+                            <h5 class="card-title mb-0 themed-title">Recent Appeals</h5>
+                            <a href="{% url 'admin-appeals' %}" class="btn btn-sm themed-button">Review</a>
                         </div>
                         <div class="card-body p-0">
                             <div class="list-group list-group-flush">
@@ -444,15 +554,15 @@
                                     <div class="d-flex align-items-center">
                                         <div class="flex-shrink-0">
                                             {% if appeal.status == 'pending' %}
-                                            <span class="badge rounded-circle p-2" style="background-color: #9c74d4;"><i class="bi bi-hourglass-split"></i></span>
+                                            <span class="badge rounded-circle p-2 themed-badge"><i class="bi bi-hourglass-split"></i></span>
                                             {% elif appeal.status == 'approved' %}
-                                            <span class="badge rounded-circle p-2" style="background-color: #5a3d99;"><i class="bi bi-check-lg"></i></span>
+                                            <span class="badge rounded-circle p-2 themed-badge"><i class="bi bi-check-lg"></i></span>
                                             {% else %}
-                                            <span class="badge rounded-circle p-2" style="background-color: #8540c7;"><i class="bi bi-x-lg"></i></span>
+                                            <span class="badge rounded-circle p-2 themed-badge"><i class="bi bi-x-lg"></i></span>
                                             {% endif %}
                                         </div>
                                         <div class="ms-3 flex-grow-1">
-                                            <h6 class="mb-1">{{ appeal.user.username }}</h6>
+                                        <h6 class="mb-1">{{ appeal.user.username }}</h6>
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <small class="text-muted">Status: {{ appeal.get_status_display }}</small>
                                                 <small class="text-muted">{{ appeal.created_at|timesince }} ago</small>
@@ -467,6 +577,31 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            
+            <!-- Recent Activity Skeleton Loader (hidden when content is loaded) -->
+            <div id="skeleton-loader-activity" class="row mt-4" style="display: none;">
+                {% for i in "123" %}
+                <div class="col-md-4 mb-4">
+                    <div class="skeleton-card">
+                        <div class="skeleton" style="height: 50px; margin-bottom: 0;"></div>
+                        <div class="p-3">
+                            {% for j in "123" %}
+                            <div class="d-flex mb-3">
+                                <div class="skeleton" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 12px;"></div>
+                                <div class="w-100">
+                                    <div class="skeleton" style="height: 18px; margin-bottom: 8px;"></div>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="skeleton" style="width: 40%; height: 12px;"></div>
+                                        <div class="skeleton" style="width: 30%; height: 12px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
             {% endblock %}
         </main>
@@ -502,8 +637,29 @@
             'rgba(90, 61, 153, 1)'     // #5a3d99
         ];
         
+        // Show skeleton loaders
+        const skeletonChart = document.getElementById('skeleton-loader-chart');
+        const skeletonActivity = document.getElementById('skeleton-loader-activity');
+        const chartContainer = document.querySelector('.col-md-8.mx-auto .card');
+        const activityContainer = document.querySelector('.row.mt-4');
+        
+        // Show skeleton loaders initially
+        if (skeletonChart) {
+            skeletonChart.style.display = 'block';
+            if (chartContainer) {
+                chartContainer.classList.add('content-loading');
+            }
+        }
+        
+        if (skeletonActivity) {
+            skeletonActivity.style.display = 'flex';
+            if (activityContainer) {
+                activityContainer.classList.add('content-loading');
+            }
+        }
+        
         // Create the chart
-        new Chart(ctx, {
+        let chart = new Chart(ctx, {
             type: 'pie',
             data: {
                 labels: labels,
@@ -517,6 +673,19 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: {
+                    onComplete: function() {
+                        setTimeout(() => {
+                            if (skeletonChart) {
+                                skeletonChart.style.display = 'none';
+                                if (chartContainer) {
+                                    chartContainer.classList.remove('content-loading');
+                                    chartContainer.classList.add('content-loaded');
+                                }
+                            }
+                        }, 300);
+                    }
+                },
                 plugins: {
                     legend: {
                         position: 'right',
@@ -525,7 +694,7 @@
                                 size: 14
                             },
                             padding: 20,
-                            color: '#5a3d99' // Dark purple color for legend text
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim()
                         }
                     },
                     title: {
@@ -539,7 +708,7 @@
                             top: 10,
                             bottom: 20
                         },
-                        color: '#7952b3' // Medium purple color for title
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim()
                     },
                     tooltip: {
                         callbacks: {
@@ -551,14 +720,82 @@
                                 return `${label}: ${value} (${percentage}%)`;
                             }
                         },
-                        titleColor: '#5a3d99', // Dark purple for tooltip title
-                        bodyColor: '#7952b3',  // Medium purple for tooltip body
+                        titleColor: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim(),
+                        bodyColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim(),
                         backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                        borderColor: '#9c74d4',
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim(),
                         borderWidth: 1
                     }
                 }
             }
+        });
+        
+        // Hide skeleton loaders when chart and content is loaded
+        if (!chart.options.animation) {
+            // If animation isn't available, hide skeletons after a delay
+            setTimeout(() => {
+                if (skeletonChart) {
+                    skeletonChart.style.display = 'none';
+                    if (chartContainer) {
+                        chartContainer.classList.remove('content-loading');
+                        chartContainer.classList.add('content-loaded');
+                    }
+                }
+            }, 1000);
+        }
+        
+        // For content loading
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                if (skeletonActivity) {
+                    skeletonActivity.style.display = 'none';
+                    if (activityContainer) {
+                        activityContainer.classList.remove('content-loading');
+                        activityContainer.classList.add('content-loaded');
+                    }
+                }
+            }, 500);
+        });
+        
+        // Sidebar toggle functionality
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('main');
+        
+        // Check if the sidebar is collapsed in localStorage
+        const isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        
+        // Apply the initial state
+        if (isSidebarCollapsed) {
+            sidebar.classList.add('collapsed');
+            mainContent.classList.add('expanded');
+        }
+        
+        // Update the toggle button icon
+        function updateToggleIcon() {
+            const icon = sidebarToggle.querySelector('i');
+            if (sidebar.classList.contains('collapsed')) {
+                icon.classList.remove('bi-list');
+                icon.classList.add('bi-arrow-right-square');
+            } else {
+                icon.classList.remove('bi-arrow-right-square');
+                icon.classList.add('bi-list');
+            }
+        }
+        
+        // Initialize the icon
+        updateToggleIcon();
+        
+        // Add click event to toggle the sidebar
+        sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+            
+            // Save the state to localStorage
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+            
+            // Update the icon
+            updateToggleIcon();
         });
     });
 </script>

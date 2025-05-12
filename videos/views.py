@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-from .models import Video, Comment, Subscription, Notification, VideoReport
+from .models import Video, Comment, Subscription, Notification, VideoReport, WatchHistory, SavedVideo
 from users.models import AccountAppeal
 from .forms import VideoForm, CommentForm, VideoReportForm
 from django.http import JsonResponse
@@ -24,10 +24,23 @@ def home(request):
     # Get featured landscape video (most viewed video)
     featured_video = Video.objects.filter(orientation='landscape').order_by('-views').first()
     
+    # If user is authenticated, get recently watched, liked and saved videos
+    watch_history = []
+    liked_videos = []
+    saved_videos = []
+    
+    if request.user.is_authenticated:
+        watch_history = WatchHistory.objects.filter(user=request.user).select_related('video')[:5]
+        liked_videos = Video.objects.filter(likes=request.user)[:5]
+        saved_videos = SavedVideo.objects.filter(user=request.user).select_related('video')[:5]
+    
     context = {
         'latest_videos': latest_videos,
         'popular_videos': popular_videos,
         'featured_video': featured_video,
+        'watch_history': watch_history,
+        'liked_videos': liked_videos,
+        'saved_videos': saved_videos,
     }
     return render(request, 'videos/home.html', context)
 
@@ -41,11 +54,30 @@ class VideoDetailView(DetailView):
         Video.objects.filter(pk=video.pk).update(views=F('views') + 1)
         # Refresh the video object to get the updated view count
         video.refresh_from_db()
+        
+        # Add to watch history if user is authenticated
+        if self.request.user.is_authenticated:
+            WatchHistory.objects.update_or_create(
+                user=self.request.user,
+                video=video,
+                defaults={'watched_at': timezone.now()}
+            )
+            
         return video
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['comment_form'] = CommentForm()
+        
+        # Add whether the video is saved by the current user
+        if self.request.user.is_authenticated:
+            context['is_saved'] = SavedVideo.objects.filter(
+                user=self.request.user, 
+                video=self.object
+            ).exists()
+        else:
+            context['is_saved'] = False
+            
         return context
 
     def post(self, request, *args, **kwargs):
@@ -647,3 +679,50 @@ def search_videos(request):
     }
     
     return render(request, 'videos/search_results.html', context)
+
+@login_required
+def save_video(request, pk):
+    video = get_object_or_404(Video, pk=pk)
+    saved, created = SavedVideo.objects.get_or_create(user=request.user, video=video)
+    
+    if not created:
+        # Video was already saved, so unsave it
+        saved.delete()
+        is_saved = False
+    else:
+        is_saved = True
+        
+    return JsonResponse({'saved': is_saved})
+
+@login_required
+def get_watch_history(request):
+    history = WatchHistory.objects.filter(user=request.user).select_related('video')
+    return render(request, 'videos/watch_history.html', {'history': history})
+
+@login_required
+def clear_watch_history(request):
+    if request.method == 'POST':
+        WatchHistory.objects.filter(user=request.user).delete()
+        messages.success(request, 'Watch history cleared successfully!')
+    return redirect('watch_history')
+
+@login_required
+def get_saved_videos(request):
+    saved_videos = SavedVideo.objects.filter(user=request.user).select_related('video')
+    return render(request, 'videos/saved_videos.html', {'saved_videos': saved_videos})
+
+@login_required
+def get_liked_videos(request):
+    videos = Video.objects.filter(likes=request.user)
+    return render(request, 'videos/liked_videos.html', {'videos': videos})
+
+@login_required
+def your_videos(request):
+    """Display the videos uploaded by the current user."""
+    videos = Video.objects.filter(author=request.user).order_by('-date_posted')
+    
+    context = {
+        'videos': videos,
+        'title': 'Your Videos'
+    }
+    return render(request, 'videos/your_videos.html', context)

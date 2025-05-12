@@ -26,18 +26,18 @@
             </div>
             
             <!-- Sort Filter -->
-            <div class="btn-group">
+        <div class="btn-group">
                 <button type="button" class="btn btn-sm dropdown-toggle" style="color: #7952b3; border-color: #7952b3;" data-bs-toggle="dropdown">
                     {% if current_sort == 'username' %}
                         Sort by Username
                     {% else %}
                         Sort by Date Joined
                     {% endif %}
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
                     <li><a class="dropdown-item {% if current_sort == 'date' %}active{% endif %}" href="?sort=date{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Sort by Date Joined</a></li>
                     <li><a class="dropdown-item {% if current_sort == 'username' %}active{% endif %}" href="?sort=username{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Sort by Username</a></li>
-                </ul>
+            </ul>
             </div>
         </div>
     </div>

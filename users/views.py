@@ -40,6 +40,15 @@ def settings(request):
                 messages.success(request, 'Your profile has been updated!')
                 return redirect('settings')
         
+        elif 'theme_submit' in request.POST:
+            # Handle theme update separately to avoid requiring profile picture upload again
+            userprofile = request.user.userprofile
+            userprofile.dark_mode = 'dark_mode' in request.POST and request.POST.get('dark_mode') == 'on'
+            userprofile.theme = request.POST.get('theme', 'default')
+            userprofile.save()
+            messages.success(request, 'Your theme settings have been updated!')
+            return redirect('settings')
+        
         elif 'password_submit' in request.POST:
             password_form = CustomPasswordChangeForm(request.user, request.POST)
             if password_form.is_valid():

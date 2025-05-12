@@ -6,9 +6,19 @@ from django.dispatch import receiver
 # Create your models here.
 
 class UserProfile(models.Model):
+    THEME_CHOICES = (
+        ('default', 'Default'),
+        ('purple', 'Purple'),
+        ('blue', 'Blue'),
+        ('green', 'Green'),
+        ('orange', 'Orange'),
+    )
+    
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     profile_picture = models.ImageField(upload_to='profile_pics/', default='profile_pics/default.png')
     bio = models.TextField(max_length=500, blank=True)
+    dark_mode = models.BooleanField(default=False)
+    theme = models.CharField(max_length=10, choices=THEME_CHOICES, default='default')
 
     def __str__(self):
         return f'{self.user.username} Profile'

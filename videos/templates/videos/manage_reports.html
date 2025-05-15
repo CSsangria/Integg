@@ -4,10 +4,10 @@
 
 {% block admin_content %}
 <div class="card shadow-sm">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3" style="border-bottom: 2px solid #7952b3;">
-        <h5 class="card-title mb-0" style="color: #5a3d99;">Pending Reports</h5>
+    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 themed-header">
+        <h5 class="card-title mb-0 themed-title">Pending Reports</h5>
         <div class="btn-group">
-            <button type="button" class="btn btn-sm dropdown-toggle" style="color: #7952b3; border-color: #7952b3;" data-bs-toggle="dropdown">
+            <button type="button" class="btn btn-sm dropdown-toggle themed-button-outline" data-bs-toggle="dropdown">
                 <i class="bi bi-funnel me-1"></i> Filter
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
@@ -32,23 +32,23 @@
                     {% for report in reports %}
                     <tr>
                         <td>
-                            <a href="{% url 'video-detail' report.video.pk %}" class="text-decoration-none" style="color: #5a3d99;">
+                            <a href="{% url 'video-detail' report.video.pk %}" class="text-decoration-none themed-link">
                                 {{ report.video.title }}
                             </a>
                         </td>
                         <td>
-                            <a href="{% url 'user_dashboard' report.reporter.username %}" class="text-decoration-none" style="color: #7952b3;">
+                            <a href="{% url 'user_dashboard' report.reporter.username %}" class="text-decoration-none themed-link">
                                 {{ report.reporter.username }}
                             </a>
                         </td>
-                        <td><span class="badge rounded-pill" style="background-color: #9c74d4;">{{ report.get_reason_display }}</span></td>
+                        <td><span class="badge rounded-pill badge-light-purple">{{ report.get_reason_display }}</span></td>
                         <td>{{ report.created_at|date:"M d, Y H:i" }}</td>
                         <td>
                             <div class="btn-group">
-                                <a href="{% url 'handle-report' report.pk %}" class="btn btn-sm" style="background-color: #7952b3; color: white;">
+                                <a href="{% url 'handle-report' report.pk %}" class="btn btn-sm themed-button">
                                     <i class="bi bi-eye"></i> Review
                                 </a>
-                                <button type="button" class="btn btn-sm" style="background-color: #5a3d99; color: white;" data-bs-toggle="modal" data-bs-target="#deleteModal{{ report.pk }}">
+                                <button type="button" class="btn btn-sm themed-button-alt" data-bs-toggle="modal" data-bs-target="#deleteModal{{ report.pk }}">
                                     <i class="bi bi-trash"></i> Delete Video
                                 </button>
                             </div>
@@ -57,8 +57,8 @@
                             <div class="modal fade" id="deleteModal{{ report.pk }}" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
-                                        <div class="modal-header" style="border-bottom: 2px solid #7952b3;">
-                                            <h5 class="modal-title" style="color: #5a3d99;">Delete Video</h5>
+                                        <div class="modal-header themed-header">
+                                            <h5 class="modal-title themed-title">Delete Video</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
@@ -66,11 +66,11 @@
                                             This action cannot be undone.
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn" style="background-color: #9c74d4; color: white;" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="button" class="btn themed-button-light" data-bs-dismiss="modal">Cancel</button>
                                             <form action="{% url 'handle-report' report.pk %}" method="POST" class="d-inline">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="action" value="delete">
-                                                <button type="submit" class="btn" style="background-color: #7952b3; color: white;">Delete Video</button>
+                                                <button type="submit" class="btn themed-button">Delete Video</button>
                                             </form>
                                         </div>
                                     </div>
@@ -81,7 +81,7 @@
                     {% empty %}
                     <tr>
                         <td colspan="5" class="text-center">
-                            <div class="alert m-3" style="background-color: rgba(121, 82, 179, 0.1); border-color: #7952b3; color: #5a3d99;">No pending reports found.</div>
+                            <div class="alert m-3 themed-alert">No pending reports found.</div>
                         </td>
                     </tr>
                     {% endfor %}

@@ -35,7 +35,7 @@
                     --primary-color: #e67e22;
                     --primary-color-rgb: 230, 126, 34;
                 {% else %}
-                    --primary-color: #fb7299;
+            --primary-color: #fb7299;
                     --primary-color-rgb: 251, 114, 153;
                 {% endif %}
                 
@@ -47,10 +47,10 @@
                     --card-bg: #333333;
                     --border-color: #444444;
                 {% else %}
-                    --secondary-color: #f4f4f5;
-                    --dark-color: #18191c;
-                    --text-color: #18191c;
-                    --light-text: #9499a0;
+            --secondary-color: #f4f4f5;
+            --dark-color: #18191c;
+            --text-color: #18191c;
+            --light-text: #9499a0;
                     --card-bg: #ffffff;
                     --border-color: #e5e5e5;
                 {% endif %}
@@ -443,6 +443,7 @@
             max-width: 600px;
             margin: 0 auto;
             position: relative;
+            padding: 0 10px;
         }
 
         .footer-nav a {
@@ -451,12 +452,17 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             font-size: 0.875rem;
+            padding: 0.25rem;
+            flex: 1;
+            text-align: center;
         }
 
         .footer-nav a i {
             font-size: 1.25rem;
             margin-bottom: 0.25rem;
+            line-height: 1;
         }
 
         .footer-nav a:hover {
@@ -466,7 +472,7 @@
         .circular-button {
             position: absolute;
             left: 50%;
-            top: -30px;
+            top: -62px;
             transform: translateX(-50%);
             width: 60px;
             height: 60px;
@@ -477,6 +483,7 @@
             justify-content: center;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
             transition: transform 0.2s;
+            z-index: 1010;
         }
 
         {% if user.is_authenticated %}
@@ -488,12 +495,12 @@
                 margin-bottom: -4px;
             }
             {% else %}
-            .circular-button i {
-                font-size: 3.5rem;
-                color: black;
-                line-height: 0;
-                margin-bottom: -4px;
-            }
+        .circular-button i {
+            font-size: 3.5rem;
+            color: black;
+            line-height: 0;
+            margin-bottom: -4px;
+        }
             {% endif %}
         {% else %}
         .circular-button i {
@@ -517,6 +524,13 @@
             position: relative;
             display: inline-block;
         }
+        
+        /* Ensuring notification-dropdown takes equal space in footer */
+        .footer-nav .notification-dropdown {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
 
         .notification-trigger {
             color: var(--light-text);
@@ -531,6 +545,7 @@
         .notification-trigger i {
             font-size: 1.25rem;
             margin-bottom: 0.25rem;
+            line-height: 1;
         }
 
         .notification-count {
@@ -680,7 +695,7 @@
                         {% elif user.userprofile.theme == 'orange' %}
                             <img src="/media/Plogo_orange.png" alt="PiliPili" class="d-inline-block" onerror="this.src='/media/Plogo.png'">
                         {% else %}
-                            <img src="/media/Plogo.png" alt="PiliPili" class="d-inline-block" onerror="this.style.display='none'">
+                    <img src="/media/Plogo.png" alt="PiliPili" class="d-inline-block" onerror="this.style.display='none'">
                         {% endif %}
                     {% else %}
                         <img src="/media/Plogo.png" alt="PiliPili" class="d-inline-block" onerror="this.style.display='none'">
@@ -750,11 +765,11 @@
 
     <footer class="footer">
         <nav class="footer-nav">
-            <a href="{% url 'home' %}">
+            <a href="{% url 'home' %}" style="flex: 1; text-align: center;">
                 <i class="bi bi-house"></i>
                 <span>Home</span>
             </a>
-            <a href="{% url 'shorts' %}">
+            <a href="{% url 'shorts' %}" style="flex: 1; text-align: center;">
                 <i class="bi bi-camera-reels"></i>
                 <span>Shorts</span>
             </a>
@@ -768,9 +783,9 @@
             </a>
             {% endif %}
             {% if user.is_authenticated %}
-            <div class="notification-dropdown">
+            <div class="notification-dropdown" style="flex: 1; display: flex; justify-content: center;">
                 <div class="notification-overlay"></div>
-                <a href="#" class="notification-trigger">
+                <a href="#" class="notification-trigger" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
                     <i class="bi bi-bell"></i>
                     <span class="notification-count" style="display: none;">0</span>
                     <span>Notifications</span>
@@ -786,12 +801,12 @@
                 </div>
             </div>
             {% else %}
-            <a href="{% url 'login' %}">
+            <a href="{% url 'login' %}" style="flex: 1; text-align: center;">
                 <i class="bi bi-bell"></i>
                 <span>Notifications</span>
             </a>
             {% endif %}
-            <a href="{% url 'profile' %}">
+            <a href="{% url 'profile' %}" style="flex: 1; text-align: center;">
                 <i class="bi bi-person"></i>
                 <span>Profile</span>
             </a>

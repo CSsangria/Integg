@@ -9,6 +9,11 @@
 
 {% block styles %}
 <style>
+    /* Hide footer on admin dashboard */
+    .footer {
+        display: none !important;
+    }
+
     /* Theme Variables */
     :root {
         /* These will be overridden by the base theme variables */
@@ -19,10 +24,141 @@
         --hover-purple: var(--primary-color);
     }
     
+    /* Theme toggle switch */
+    .theme-switch-wrapper {
+        display: flex;
+        align-items: center;
+    }
+    
+    .theme-switch {
+        display: inline-block;
+        height: 24px;
+        position: relative;
+        width: 50px;
+    }
+
+    .theme-switch input {
+        display: none;
+    }
+
+    .slider {
+        background-color: #ccc;
+        bottom: 0;
+        cursor: pointer;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        background-color: white;
+        bottom: 4px;
+        content: "";
+        height: 16px;
+        left: 4px;
+        position: absolute;
+        transition: .4s;
+        width: 16px;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: var(--primary-color);
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+    
+    .theme-icon {
+        margin: 0 8px;
+        font-size: 16px;
+    }
+    
     /* Badges */
     .badge-light-purple {
         background-color: var(--primary-color);
         color: white;
+    }
+    
+    /* Theme-based Element Styles */
+    .themed-link {
+        color: var(--primary-color);
+        transition: color 0.2s ease;
+    }
+    
+    .themed-link:hover {
+        color: var(--dark-color);
+    }
+    
+    .themed-input {
+        border-color: var(--primary-color);
+        transition: all 0.2s ease;
+    }
+    
+    .themed-input:focus {
+        border-color: var(--dark-color);
+        box-shadow: 0 0 0 0.25rem rgba(var(--primary-color-rgb), 0.25);
+    }
+    
+    .themed-button {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+        transition: all 0.2s ease;
+    }
+    
+    .themed-button:hover {
+        background-color: var(--dark-color);
+        border-color: var(--dark-color);
+        transform: translateY(-2px);
+    }
+    
+    .themed-button-outline {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.2s ease;
+    }
+    
+    .themed-button-outline:hover {
+        background-color: rgba(var(--primary-color-rgb), 0.1);
+        color: var(--dark-color);
+        border-color: var(--dark-color);
+    }
+    
+    .themed-button-alt {
+        background-color: var(--dark-color);
+        color: white;
+        border-color: var(--dark-color);
+        transition: all 0.2s ease;
+    }
+    
+    .themed-button-alt:hover {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+    }
+    
+    .themed-button-light {
+        background-color: var(--primary-color);
+        opacity: 0.8;
+        color: white;
+        border-color: var(--primary-color);
+        transition: all 0.2s ease;
+    }
+    
+    .themed-button-light:hover {
+        opacity: 1;
+        transform: translateY(-2px);
+    }
+    
+    .themed-alert {
+        background-color: rgba(var(--primary-color-rgb), 0.1);
+        border-color: var(--primary-color);
+        color: var(--text-color);
     }
     
     /* Sidebar styling */
@@ -150,22 +286,24 @@
     
     /* Card styling */
     .card {
-        transition: transform 0.2s, box-shadow 0.2s;
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
         border: none;
         border-radius: 0.5rem;
+        background-color: var(--card-bg);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     }
     
     .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 15px rgba(var(--primary-color-rgb), 0.1) !important;
+        transform: translateY(-5px) scale(1.01);
+        box-shadow: 0 10px 20px rgba(var(--primary-color-rgb), 0.12) !important;
     }
     
     .shadow-sm {
-        box-shadow: 0 .125rem .375rem rgba(var(--primary-color-rgb), 0.15) !important;
+        box-shadow: 0 .125rem .25rem rgba(var(--primary-color-rgb), 0.08) !important;
     }
     
     .list-group-item-action:hover {
-        background-color: rgba(var(--primary-color-rgb), 0.05);
+        background-color: rgba(var(--primary-color-rgb), 0.03);
     }
     
     .btn-sm {
@@ -175,7 +313,7 @@
     
     .btn-sm:hover {
         transform: translateY(-1px);
-        box-shadow: 0 2px 5px rgba(var(--primary-color-rgb), 0.2);
+        box-shadow: 0 2px 5px rgba(var(--primary-color-rgb), 0.1);
     }
     
     /* Custom badges */
@@ -192,6 +330,12 @@
     .badge-light-purple {
         background-color: var(--primary-color);
         opacity: 0.8;
+        color: white;
+    }
+    
+    /* Themed badge for rounded icons */
+    .themed-badge {
+        background-color: var(--primary-color);
         color: white;
     }
     
@@ -246,31 +390,289 @@
         color: var(--text-color);
     }
     
-    .themed-button {
-        background-color: var(--primary-color);
-        color: white;
-        border-color: var(--primary-color);
-    }
-    
-    .themed-button-outline {
-        color: var(--primary-color);
-        border-color: var(--primary-color);
-    }
-    
-    .themed-badge {
-        background-color: var(--primary-color);
-    }
-    
     .card-title-with-border {
         color: var(--text-color);
         border-left: 4px solid var(--primary-color);
         padding-left: 10px;
+    }
+
+    /* Skeleton Loading Animation for Tables */
+    .skeleton-table {
+        border-radius: 0.5rem;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        opacity: 0;
+        animation: fadeIn 0.5s ease-in-out forwards;
+        animation-delay: 0.2s;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .skeleton-table-row {
+        display: flex;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid rgba(var(--primary-color-rgb), 0.08);
+    }
+    
+    .skeleton-table-header {
+        background-color: rgba(var(--primary-color-rgb), 0.05);
+        font-weight: bold;
+    }
+    
+    .skeleton-cell {
+        height: 20px;
+        margin-right: 10px;
+        border-radius: 4px;
+        animation: shimmer 2s infinite linear;
+        background: linear-gradient(90deg, 
+            rgba(var(--primary-color-rgb), 0.05), 
+            rgba(var(--primary-color-rgb), 0.1), 
+            rgba(var(--primary-color-rgb), 0.05));
+        background-size: 1000px 100%;
+    }
+    
+    .skeleton-cell-sm {
+        width: 15%;
+    }
+    
+    .skeleton-cell-md {
+        width: 25%;
+    }
+    
+    .skeleton-cell-lg {
+        width: 40%;
+    }
+    
+    /* Add table placeholder structure after charts */
+    #skeleton-loader-table {
+        display: none;
+    }
+
+    /* Dark Mode Specific Styles */
+    body.dark-mode,
+    html[data-bs-theme="dark"] body {
+        background-color: #1a1a1a;
+        color: #f5f5f7;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    
+    html[data-bs-theme="dark"] .sidebar {
+        background-color: #252525 !important;
+        transition: background-color 0.3s ease;
+    }
+    
+    html[data-bs-theme="dark"] .card {
+        background-color: #2d2d2d;
+        border-color: #3a3a3a;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+    
+    html[data-bs-theme="dark"] .card-header {
+        background-color: #2d2d2d !important;
+        border-color: #3a3a3a;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+    
+    html[data-bs-theme="dark"] .list-group-item {
+        background-color: #2d2d2d;
+        border-color: #3a3a3a;
+        color: #f5f5f7;
+        transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    }
+    
+    html[data-bs-theme="dark"] .list-group-item:hover {
+        background-color: #353535;
+    }
+    
+    html[data-bs-theme="dark"] .text-muted {
+        color: #a0a0a0 !important;
+    }
+    
+    html[data-bs-theme="dark"] .themed-title {
+        color: #f5f5f7;
+        transition: color 0.3s ease;
+    }
+    
+    html[data-bs-theme="dark"] .page-header {
+        border-color: rgba(var(--primary-color-rgb), 0.3);
+        transition: border-color 0.3s ease;
+    }
+    
+    html[data-bs-theme="dark"] .btn-outline-secondary {
+        color: #f5f5f7;
+        border-color: #5a5a5a;
+        transition: color 0.3s ease, border-color 0.3s ease;
+    }
+    
+    html[data-bs-theme="dark"] .table {
+        color: #f5f5f7;
+        transition: color 0.3s ease;
+    }
+    
+    html[data-bs-theme="dark"] main {
+        background-color: #1a1a1a;
+        transition: background-color 0.3s ease;
+    }
+    
+    html[data-bs-theme="dark"] .nav-link {
+        color: #f5f5f7 !important;
+        transition: color 0.3s ease;
+    }
+    
+    html[data-bs-theme="dark"] .alert {
+        border-color: #3a3a3a;
+        background-color: #2d2d2d;
+        color: #f5f5f7;
+        transition: all 0.3s ease;
+    }
+    
+    html[data-bs-theme="dark"] .themed-link {
+        color: var(--primary-color);
+    }
+    
+    html[data-bs-theme="dark"] .themed-link:hover {
+        color: var(--light-color);
+    }
+    
+    html[data-bs-theme="dark"] .themed-alert {
+        background-color: rgba(var(--primary-color-rgb), 0.2);
+        border-color: var(--primary-color);
+        color: #f5f5f7;
+    }
+    
+    html[data-bs-theme="dark"] .form-control,
+    html[data-bs-theme="dark"] .themed-input {
+        background-color: #2d2d2d;
+        border-color: #3a3a3a;
+        color: #f5f5f7;
+    }
+    
+    html[data-bs-theme="dark"] .form-control:focus,
+    html[data-bs-theme="dark"] .themed-input:focus {
+        background-color: #353535;
+        border-color: var(--primary-color);
+        color: #f5f5f7;
+        box-shadow: 0 0 0 0.25rem rgba(var(--primary-color-rgb), 0.25);
+    }
+    
+    /* Force immediate repainting for charts and canvases */
+    canvas {
+        transition: none !important;
+    }
+    
+    /* Mobile Responsiveness */
+    @media (max-width: 767.98px) {
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: -100%;
+            width: 250px;
+            z-index: 1050;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .sidebar.show {
+            left: 0;
+        }
+        
+        main {
+            margin-left: 0 !important;
+            padding-top: 56px;
+        }
+        
+        .page-header {
+            flex-direction: column;
+            align-items: start !important;
+        }
+        
+        .theme-switch-wrapper {
+            margin-top: 10px;
+        }
+        
+        .navbar-mobile {
+            display: flex !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1040;
+            background-color: var(--card-bg);
+            padding: 0.5rem 1rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card {
+            margin-bottom: 1rem;
+        }
+        
+        .table-responsive {
+            border-radius: 0.5rem;
+            overflow-x: auto;
+        }
+        
+        .mobile-menu-button {
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: rgba(var(--primary-color-rgb), 0.1);
+            color: var(--primary-color);
+            transition: all 0.2s ease;
+        }
+        
+        .mobile-menu-button:hover {
+            background-color: rgba(var(--primary-color-rgb), 0.2);
+        }
+        
+        .mobile-logo {
+            font-weight: 600;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+        }
+    }
+
+    /* Background highlight for unread items */
+    .bg-light-highlight {
+        background-color: rgba(var(--primary-color-rgb), 0.05);
+    }
+
+    html[data-bs-theme="dark"] .bg-light-highlight {
+        background-color: rgba(var(--primary-color-rgb), 0.1);
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid">
+    <!-- CSRF Token for forms -->
+    {% csrf_token %}
+    
+    <!-- Mobile Navigation Bar (hidden on desktop) -->
+    <div class="navbar-mobile d-md-none">
+        <div class="d-flex justify-content-between align-items-center w-100">
+            <div class="mobile-menu-button" id="mobileSidebarToggle">
+                <i class="bi bi-list"></i>
+            </div>
+            <div class="mobile-logo">PiliPili Admin</div>
+            <div class="theme-switch-wrapper">
+                <span class="theme-icon"><i class="bi bi-sun"></i></span>
+                <label class="theme-switch" for="mobile-admin-theme-toggle">
+                    <input type="checkbox" id="mobile-admin-theme-toggle" {% if user.userprofile.dark_mode %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+                <span class="theme-icon"><i class="bi bi-moon"></i></span>
+            </div>
+        </div>
+    </div>
+    
     <div class="row">
         <!-- Sidebar -->
         <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
@@ -336,6 +738,14 @@
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 page-header">
                 <h1 class="h2">{% block admin_title %}Admin Dashboard{% endblock %}</h1>
+                <div class="theme-switch-wrapper">
+                    <span class="theme-icon"><i class="bi bi-sun"></i></span>
+                    <label class="theme-switch" for="admin-theme-toggle">
+                        <input type="checkbox" id="admin-theme-toggle" {% if user.userprofile.dark_mode %}checked{% endif %}>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="theme-icon"><i class="bi bi-moon"></i></span>
+                </div>
             </div>
             
             {% if messages %}
@@ -374,7 +784,7 @@
                 </div>
                 
                 <div class="col-md-3 mb-4">
-                    <div class="card modern-card stat-card stat-card-dark h-100">
+                    <div class="card modern-card stat-card stat-card-primary h-100">
                         <div class="card-body d-flex flex-column">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="card-subtitle mb-0">Total Users</h6>
@@ -428,7 +838,7 @@
                 </div>
                 
                 <div class="col-md-3 mb-4">
-                    <div class="card modern-card text-white h-100" style="background-color: #a64edd;">
+                    <div class="card modern-card stat-card stat-card-primary h-100">
                         <div class="card-body d-flex flex-column">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="card-subtitle mb-0">Total Comments</h6>
@@ -481,98 +891,108 @@
                 <div class="col-12 mb-3">
                     <h4 class="card-title card-title-with-border">Recent Activity</h4>
                 </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card modern-card shadow-sm h-100">
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 themed-header">
-                            <h5 class="card-title mb-0 themed-title">Recent Videos</h5>
-                            <a href="{% url 'admin-videos' %}" class="btn btn-sm themed-button">View All</a>
+                
+                <!-- Table Skeleton Loader -->
+                <div id="skeleton-loader-table" class="row">
+                    <!-- Skeleton content -->
+                </div>
+                
+                <div id="activity-content" class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="card modern-card shadow-sm h-100">
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 themed-header">
+                                <h5 class="card-title mb-0 themed-title">Recent Videos</h5>
+                                <a href="{% url 'admin-videos' %}" class="btn btn-sm themed-button">View All</a>
                         </div>
-                        <div class="card-body p-0">
+                            <div class="card-body p-0">
                             <div class="list-group list-group-flush">
                                 {% for video in recent_videos %}
                                 <a href="{% url 'video-detail' video.pk %}" class="list-group-item list-group-item-action">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-shrink-0">
-                                            <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" class="rounded" style="width: 60px; height: 40px; object-fit: cover;" loading="lazy">
-                                        </div>
-                                        <div class="ms-3 flex-grow-1">
-                                            <h6 class="mb-1 text-truncate">{{ video.title }}</h6>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <small class="text-muted">By {{ video.author.username }}</small>
-                                                <small class="text-muted">{{ video.date_posted|timesince }} ago</small>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                                <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" class="rounded" style="width: 60px; height: 40px; object-fit: cover;" loading="lazy">
                                             </div>
-                                        </div>
+                                            <div class="ms-3 flex-grow-1">
+                                                <h6 class="mb-1 text-truncate">{{ video.title }}</h6>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <small class="text-muted">By {{ video.author.username }}</small>
+                                                    <small class="text-muted">{{ video.date_posted|timesince }} ago</small>
+                                                </div>
+                                            </div>
                                     </div>
                                 </a>
-                                {% empty %}
-                                <div class="text-center p-4 text-muted">No recent videos.</div>
+                                    {% empty %}
+                                    <div class="text-center p-4 text-muted">No recent videos.</div>
                                 {% endfor %}
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    <div class="col-md-4 mb-4">
+                        <div class="card modern-card shadow-sm h-100">
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 themed-header">
+                                <h5 class="card-title mb-0 themed-title">Recent Reports</h5>
+                                <a href="{% url 'manage-reports' %}" class="btn btn-sm themed-button">Manage</a>
                 </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card modern-card shadow-sm h-100">
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 themed-header">
-                            <h5 class="card-title mb-0 themed-title">Recent Reports</h5>
-                            <a href="{% url 'manage-reports' %}" class="btn btn-sm themed-button">Manage</a>
-                        </div>
-                        <div class="card-body p-0">
+                            <div class="card-body p-0">
                             <div class="list-group list-group-flush">
                                 {% for report in recent_reports %}
                                 <a href="{% url 'handle-report' report.pk %}" class="list-group-item list-group-item-action">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-shrink-0">
-                                            <span class="badge rounded-circle p-2 themed-badge"><i class="bi bi-flag-fill"></i></span>
-                                        </div>
-                                        <div class="ms-3 flex-grow-1">
-                                            <h6 class="mb-1 text-truncate">{{ report.video.title }}</h6>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <small class="text-muted">Reported by {{ report.reporter.username }}</small>
-                                                <small class="text-muted">{{ report.created_at|timesince }} ago</small>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                                <span class="badge rounded-circle p-2 themed-badge"><i class="bi bi-flag-fill"></i></span>
                                             </div>
-                                        </div>
+                                            <div class="ms-3 flex-grow-1">
+                                                <h6 class="mb-1 text-truncate">{{ report.video.title }}</h6>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <small class="text-muted">Reported by {{ report.reporter.username }}</small>
+                                                    <small class="text-muted">{{ report.created_at|timesince }} ago</small>
+                                                </div>
+                                            </div>
                                     </div>
                                 </a>
-                                {% empty %}
-                                <div class="text-center p-4 text-muted">No pending reports.</div>
+                                    {% empty %}
+                                    <div class="text-center p-4 text-muted">No pending reports.</div>
                                 {% endfor %}
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    <div class="col-md-4 mb-4">
+                        <div class="card modern-card shadow-sm h-100">
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 themed-header">
+                                <h5 class="card-title mb-0 themed-title">Recent Appeals</h5>
+                                <a href="{% url 'admin-appeals' %}" class="btn btn-sm themed-button">Review</a>
                 </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card modern-card shadow-sm h-100">
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 themed-header">
-                            <h5 class="card-title mb-0 themed-title">Recent Appeals</h5>
-                            <a href="{% url 'admin-appeals' %}" class="btn btn-sm themed-button">Review</a>
-                        </div>
-                        <div class="card-body p-0">
+                            <div class="card-body p-0">
                             <div class="list-group list-group-flush">
                                 {% for appeal in recent_appeals %}
                                 <a href="{% url 'admin-appeals' %}" class="list-group-item list-group-item-action">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-shrink-0">
-                                            {% if appeal.status == 'pending' %}
-                                            <span class="badge rounded-circle p-2 themed-badge"><i class="bi bi-hourglass-split"></i></span>
-                                            {% elif appeal.status == 'approved' %}
-                                            <span class="badge rounded-circle p-2 themed-badge"><i class="bi bi-check-lg"></i></span>
-                                            {% else %}
-                                            <span class="badge rounded-circle p-2 themed-badge"><i class="bi bi-x-lg"></i></span>
-                                            {% endif %}
-                                        </div>
-                                        <div class="ms-3 flex-grow-1">
-                                        <h6 class="mb-1">{{ appeal.user.username }}</h6>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <small class="text-muted">Status: {{ appeal.get_status_display }}</small>
-                                                <small class="text-muted">{{ appeal.created_at|timesince }} ago</small>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                                {% if appeal.status == 'pending' %}
+                                                <span class="badge rounded-circle p-2 themed-badge"><i class="bi bi-hourglass-split"></i></span>
+                                                {% elif appeal.status == 'approved' %}
+                                                <span class="badge rounded-circle p-2 themed-badge"><i class="bi bi-check-lg"></i></span>
+                                                {% else %}
+                                                <span class="badge rounded-circle p-2 themed-badge"><i class="bi bi-x-lg"></i></span>
+                                                {% endif %}
                                             </div>
-                                        </div>
+                                            <div class="ms-3 flex-grow-1">
+                                        <h6 class="mb-1">{{ appeal.user.username }}</h6>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <small class="text-muted">Status: {{ appeal.get_status_display }}</small>
+                                                    <small class="text-muted">{{ appeal.created_at|timesince }} ago</small>
+                                                </div>
+                                            </div>
                                     </div>
                                 </a>
                                 {% empty %}
-                                <div class="text-center p-4 text-muted">No recent appeals.</div>
+                                    <div class="text-center p-4 text-muted">No recent appeals.</div>
                                 {% endfor %}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -610,152 +1030,246 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Mobile menu toggle
+        const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
+        const sidebarElement = document.querySelector('.sidebar');
+        
+        if (mobileSidebarToggle && sidebarElement) {
+            mobileSidebarToggle.addEventListener('click', function() {
+                sidebarElement.classList.toggle('show');
+            });
+            
+            // Close sidebar when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!sidebarElement.contains(event.target) && 
+                    event.target !== mobileSidebarToggle && 
+                    !mobileSidebarToggle.contains(event.target) && 
+                    window.innerWidth < 768) {
+                    sidebarElement.classList.remove('show');
+                }
+            });
+        }
+        
+        // Sync theme toggles
+        const mobileThemeToggle = document.getElementById('mobile-admin-theme-toggle');
+        const desktopThemeToggle = document.getElementById('admin-theme-toggle');
+        
+        if (mobileThemeToggle && desktopThemeToggle) {
+            mobileThemeToggle.addEventListener('change', function() {
+                desktopThemeToggle.checked = this.checked;
+                desktopThemeToggle.dispatchEvent(new Event('change'));
+            });
+        }
+        
         // Content Distribution Chart
-        const ctx = document.getElementById('contentDistributionChart').getContext('2d');
-        
-        // Prepare the data with fallbacks
-        const labels = ['Landscape Videos', 'Portrait Videos (Shorts)', 'Comments', 'Users'];
-        const data = [
-            Number('{{ landscape_videos_count|default:"1" }}'),
-            Number('{{ portrait_videos_count|default:"1" }}'),
-            Number('{{ total_comments|default:"1" }}'),
-            Number('{{ total_users|default:"1" }}')
-        ];
-        
-        // Define colors - purple theme
-        const backgroundColors = [
-            'rgba(121, 82, 179, 0.8)',  // #7952b3 - medium purple
-            'rgba(166, 78, 221, 0.8)',  // #a64edd - bright purple
-            'rgba(156, 116, 212, 0.8)', // #9c74d4 - light purple
-            'rgba(90, 61, 153, 0.8)'    // #5a3d99 - dark purple
-        ];
-        
-        const borderColors = [
-            'rgba(121, 82, 179, 1)',   // #7952b3
-            'rgba(166, 78, 221, 1)',   // #a64edd
-            'rgba(156, 116, 212, 1)',  // #9c74d4
-            'rgba(90, 61, 153, 1)'     // #5a3d99
-        ];
-        
-        // Show skeleton loaders
-        const skeletonChart = document.getElementById('skeleton-loader-chart');
-        const skeletonActivity = document.getElementById('skeleton-loader-activity');
-        const chartContainer = document.querySelector('.col-md-8.mx-auto .card');
-        const activityContainer = document.querySelector('.row.mt-4');
-        
-        // Show skeleton loaders initially
-        if (skeletonChart) {
-            skeletonChart.style.display = 'block';
-            if (chartContainer) {
-                chartContainer.classList.add('content-loading');
+        const ctx = document.getElementById('contentDistributionChart');
+        if (ctx) {
+            const context = ctx.getContext('2d');
+            
+            // Prepare the data with fallbacks
+            const labels = ['Landscape Videos', 'Portrait Videos (Shorts)', 'Comments', 'Users'];
+            const data = [
+                Number('{{ landscape_videos_count|default:"1" }}'),
+                Number('{{ portrait_videos_count|default:"1" }}'),
+                Number('{{ total_comments|default:"1" }}'),
+                Number('{{ total_users|default:"1" }}')
+            ];
+            
+            // Function to get theme colors
+            function getThemeColors() {
+                const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
+                const darkColor = getComputedStyle(document.documentElement).getPropertyValue('--dark-color').trim();
+                const lightColor = getComputedStyle(document.documentElement).getPropertyValue('--light-color') || primaryColor;
+                const secondaryColor = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color').trim();
+                
+                return {
+                    primaryColor,
+                    darkColor,
+                    lightColor,
+                    secondaryColor
+                };
             }
-        }
-        
-        if (skeletonActivity) {
-            skeletonActivity.style.display = 'flex';
-            if (activityContainer) {
-                activityContainer.classList.add('content-loading');
+            
+            // Get theme colors
+            const themeColors = getThemeColors();
+            
+            // Define colors using theme variables with more contrast between them
+            const backgroundColors = [
+                themeColors.primaryColor,                 // Primary color
+                themeColors.darkColor,                    // Dark color
+                '#FF6B6B',                                // Bright red/coral
+                '#4ECDC4'                                 // Teal
+            ];
+            
+            const borderColors = [
+                themeColors.primaryColor,
+                themeColors.darkColor,
+                '#FF6B6B',
+                '#4ECDC4'
+            ];
+            
+            // Show skeleton loaders
+            const skeletonChart = document.getElementById('skeleton-loader-chart');
+            const skeletonActivity = document.getElementById('skeleton-loader-activity');
+            const skeletonTable = document.getElementById('skeleton-loader-table');
+            const chartContainer = document.querySelector('.col-md-8.mx-auto .card');
+            const activityContainer = document.querySelector('#activity-content');
+            
+            // Show skeleton loaders initially
+            if (skeletonChart) {
+                skeletonChart.style.display = 'block';
+                if (chartContainer) {
+                    chartContainer.classList.add('content-loading');
+                }
             }
-        }
-        
-        // Create the chart
-        let chart = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: data,
-                    backgroundColor: backgroundColors,
-                    borderColor: borderColors,
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: {
-                    onComplete: function() {
-                        setTimeout(() => {
-                            if (skeletonChart) {
-                                skeletonChart.style.display = 'none';
-                                if (chartContainer) {
-                                    chartContainer.classList.remove('content-loading');
-                                    chartContainer.classList.add('content-loaded');
+            
+            if (skeletonTable) {
+                skeletonTable.style.display = 'flex';
+                if (activityContainer) {
+                    activityContainer.style.opacity = '0';
+                    activityContainer.style.transition = 'opacity 0.5s ease';
+                }
+            }
+            
+            if (skeletonActivity) {
+                skeletonActivity.style.display = 'flex';
+                if (activityContainer) {
+                    activityContainer.classList.add('content-loading');
+                }
+            }
+            
+            // Create the chart
+            if (ctx) {
+                window.chart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: backgroundColors,
+                            borderColor: borderColors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            onComplete: function() {
+                                setTimeout(() => {
+                                    if (skeletonChart) {
+                                        skeletonChart.style.display = 'none';
+                                        if (chartContainer) {
+                                            chartContainer.classList.remove('content-loading');
+                                            chartContainer.classList.add('content-loaded');
+                                        }
+                                    }
+                                }, 300);
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    font: {
+                                        size: 14
+                                    },
+                                    padding: 20,
+                                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim()
                                 }
-                            }
-                        }, 300);
-                    }
-                },
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                            font: {
-                                size: 14
                             },
-                            padding: 20,
-                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim()
-                        }
-                    },
-                    title: {
-                        display: true,
-                        text: 'Platform Content Distribution',
-                        font: {
-                            size: 18,
-                            weight: 'bold'
-                        },
-                        padding: {
-                            top: 10,
-                            bottom: 20
-                        },
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim()
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const label = context.label || '';
-                                const value = context.parsed || 0;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = Math.round((value / total) * 100);
-                                return `${label}: ${value} (${percentage}%)`;
+                            title: {
+                                display: true,
+                                text: 'Platform Content Distribution',
+                                font: {
+                                    size: 18,
+                                    weight: 'bold'
+                                },
+                                padding: {
+                                    top: 10,
+                                    bottom: 20
+                                },
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim()
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = Math.round((value / total) * 100);
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                },
+                                titleColor: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim(),
+                                bodyColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim(),
+                                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                borderColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim(),
+                                borderWidth: 1
                             }
-                        },
-                        titleColor: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim(),
-                        bodyColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim(),
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim(),
-                        borderWidth: 1
+                        }
                     }
+                });
+                
+                // Update chart colors when theme changes
+                const themeToggle = document.getElementById('admin-theme-toggle');
+                if (themeToggle) {
+                    themeToggle.addEventListener('change', function() {
+                        // We'll update the chart on page reload, but this ensures smooth transition
+                        setTimeout(() => {
+                            const newThemeColors = getThemeColors();
+                            window.chart.data.datasets[0].backgroundColor = [
+                                newThemeColors.primaryColor,
+                                newThemeColors.darkColor,
+                                '#FF6B6B',
+                                '#4ECDC4'
+                            ];
+                            window.chart.data.datasets[0].borderColor = [
+                                newThemeColors.primaryColor,
+                                newThemeColors.darkColor,
+                                '#FF6B6B',
+                                '#4ECDC4'
+                            ];
+                            window.chart.update();
+                        }, 100);
+                    });
+                }
+                
+                // Hide skeleton loaders when chart and content is loaded
+                if (!window.chart.options.animation) {
+                    // If animation isn't available, hide skeletons after a delay
+                    setTimeout(() => {
+                        if (skeletonChart) {
+                            skeletonChart.style.display = 'none';
+                            if (chartContainer) {
+                                chartContainer.classList.remove('content-loading');
+                                chartContainer.classList.add('content-loaded');
+                            }
+                        }
+                    }, 1000);
                 }
             }
-        });
-        
-        // Hide skeleton loaders when chart and content is loaded
-        if (!chart.options.animation) {
-            // If animation isn't available, hide skeletons after a delay
-            setTimeout(() => {
-                if (skeletonChart) {
-                    skeletonChart.style.display = 'none';
-                    if (chartContainer) {
-                        chartContainer.classList.remove('content-loading');
-                        chartContainer.classList.add('content-loaded');
+            
+            // For content loading
+            window.addEventListener('load', function() {
+                setTimeout(() => {
+                    if (skeletonTable) {
+                        skeletonTable.style.display = 'none';
+                        if (activityContainer) {
+                            activityContainer.style.opacity = '1';
+                        }
                     }
-                }
-            }, 1000);
+                    
+                    if (skeletonActivity) {
+                        skeletonActivity.style.display = 'none';
+                        if (activityContainer) {
+                            activityContainer.classList.remove('content-loading');
+                            activityContainer.classList.add('content-loaded');
+                        }
+                    }
+                }, 800);
+            });
         }
-        
-        // For content loading
-        window.addEventListener('load', function() {
-            setTimeout(() => {
-                if (skeletonActivity) {
-                    skeletonActivity.style.display = 'none';
-                    if (activityContainer) {
-                        activityContainer.classList.remove('content-loading');
-                        activityContainer.classList.add('content-loaded');
-                    }
-                }
-            }, 500);
-        });
         
         // Sidebar toggle functionality
         const sidebarToggle = document.getElementById('sidebarToggle');
@@ -766,37 +1280,108 @@
         const isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
         
         // Apply the initial state
-        if (isSidebarCollapsed) {
-            sidebar.classList.add('collapsed');
-            mainContent.classList.add('expanded');
-        }
-        
-        // Update the toggle button icon
-        function updateToggleIcon() {
-            const icon = sidebarToggle.querySelector('i');
-            if (sidebar.classList.contains('collapsed')) {
-                icon.classList.remove('bi-list');
-                icon.classList.add('bi-arrow-right-square');
-            } else {
-                icon.classList.remove('bi-arrow-right-square');
-                icon.classList.add('bi-list');
+        if (sidebarToggle && sidebar && mainContent) {
+            if (isSidebarCollapsed) {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('expanded');
             }
-        }
-        
-        // Initialize the icon
-        updateToggleIcon();
-        
-        // Add click event to toggle the sidebar
-        sidebarToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('expanded');
             
-            // Save the state to localStorage
-            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+            // Update the toggle button icon
+            function updateToggleIcon() {
+                const icon = sidebarToggle.querySelector('i');
+                if (sidebar.classList.contains('collapsed')) {
+                    icon.classList.remove('bi-list');
+                    icon.classList.add('bi-arrow-right-square');
+                } else {
+                    icon.classList.remove('bi-arrow-right-square');
+                    icon.classList.add('bi-list');
+                }
+            }
             
-            // Update the icon
+            // Initialize the icon
             updateToggleIcon();
-        });
+            
+            // Add click event to toggle the sidebar
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+                
+                // Save the state to localStorage
+                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+                
+                // Update the icon
+                updateToggleIcon();
+            });
+        }
     });
 </script>
+
+{% block theme_toggle_script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Dark/Light Mode Toggle - This block will work on all admin pages
+        const themeToggle = document.getElementById('admin-theme-toggle');
+        
+        if (themeToggle) {
+            // Check initial state from localStorage if not set via Django
+            const storedDarkMode = localStorage.getItem('darkMode');
+            if (storedDarkMode === 'true' && !themeToggle.checked) {
+                themeToggle.checked = true;
+            } else if (storedDarkMode === 'false' && themeToggle.checked) {
+                themeToggle.checked = false;
+            }
+            
+            // Add change event listener
+            themeToggle.addEventListener('change', function(e) {
+                // Save the preference first
+                const isDarkMode = e.target.checked;
+                
+                // Save preference to localStorage immediately for consistency
+                localStorage.setItem('darkMode', isDarkMode ? 'true' : 'false');
+                
+                // Save to server, then refresh the page
+                try {
+                    const csrftoken = getCsrfToken();
+                    
+                    fetch('/toggle-theme/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: 'dark_mode=' + (isDarkMode ? 'true' : 'false')
+                    })
+                    .finally(() => {
+                        // Refresh the page
+                        window.location.reload();
+                    });
+                } catch (e) {
+                    console.error('Error saving theme preference:', e);
+                    // Refresh anyway
+                    window.location.reload();
+                }
+            });
+        }
+        
+        function getCsrfToken() {
+            // First try getting from cookie directly
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'csrftoken') {
+                    return decodeURIComponent(value);
+                }
+            }
+            
+            // If not found in cookie, try to get from CSRF input element
+            const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+            if (csrfInput) {
+                return csrfInput.value;
+            }
+            
+            return '';
+        }
+    });
+</script>
+{% endblock %}
 {% endblock %} 

@@ -35,4 +35,5 @@ urlpatterns = [
     path('admin/users/', views.admin_users, name='admin-users'),
     path('admin/comments/', views.admin_comments, name='admin-comments'),
     path('admin/notifications/', views.admin_notifications, name='admin-notifications'),
+    path('toggle-theme/', views.toggle_theme, name='toggle-theme'),
 ] 

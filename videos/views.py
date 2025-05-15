@@ -726,3 +726,14 @@ def your_videos(request):
         'title': 'Your Videos'
     }
     return render(request, 'videos/your_videos.html', context)
+
+@login_required
+def toggle_theme(request):
+    """Toggle between dark and light mode"""
+    if request.method == 'POST':
+        dark_mode = request.POST.get('dark_mode') == 'true'
+        user_profile = request.user.userprofile
+        user_profile.dark_mode = dark_mode
+        user_profile.save()
+        return JsonResponse({'success': True, 'dark_mode': dark_mode})
+    return JsonResponse({'success': False}, status=400)

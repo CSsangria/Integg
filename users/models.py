@@ -15,7 +15,7 @@ class UserProfile(models.Model):
     )
     
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    profile_picture = models.ImageField(upload_to='profile_pics/', default='profile_pics/default.png')
+    profile_picture = models.ImageField(upload_to='profile_pics/', default='profile_pics/newuser.jpg')
     bio = models.TextField(max_length=500, blank=True)
     dark_mode = models.BooleanField(default=False)
     theme = models.CharField(max_length=10, choices=THEME_CHOICES, default='default')
@@ -46,7 +46,10 @@ class AccountAppeal(models.Model):
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        UserProfile.objects.create(user=instance)
+        UserProfile.objects.create(
+            user=instance,
+            profile_picture='profile_pics/newuser.jpg'
+        )
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):

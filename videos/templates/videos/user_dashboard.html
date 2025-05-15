@@ -10,7 +10,7 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <img src="{{ profile_user.userprofile.profile_picture.url }}" 
+                        <img src="{{ profile_user.userprofile.profile_picture.url }}"
                              alt="{{ profile_user.username }}'s profile picture"
                              class="rounded-circle me-4"
                              style="width: 100px; height: 100px; object-fit: cover;">
@@ -26,7 +26,7 @@
                                 </div>
                                 {% if user.is_authenticated and user != profile_user %}
                                 <div>
-                                    <button class="btn {% if is_subscribed %}btn-secondary{% else %}btn-primary{% endif %} subscribe-button" 
+                                    <button class="btn {% if is_subscribed %}btn-secondary{% else %}btn-primary{% endif %} subscribe-button"
                                             data-username="{{ profile_user.username }}">
                                         {% if is_subscribed %}
                                             Unsubscribe
@@ -47,27 +47,33 @@
     <!-- User's Videos -->
     <div class="row">
         <div class="col-12">
-            <h2 class="mb-4">Videos</h2>
+            <h2 class="mb-4 themed-title">Videos</h2>
         </div>
         {% for video in videos %}
         <div class="col-md-4 mb-4">
             <div class="card h-100">
                 <a href="{% url 'video-detail' video.pk %}" class="text-decoration-none">
-                    {% if video.thumbnail %}
-                    <img src="{{ video.thumbnail.url }}" class="card-img-top" alt="{{ video.title }}" style="height: 200px; object-fit: cover;">
-                    <div class="position-absolute top-0 end-0 m-2">
-                        {% if video.orientation == 'portrait' %}
-                        <span class="badge bg-primary">Short</span>
+                    <div style="position: relative; height: 200px; background-color: var(--dark-color);">
+                        {% if video.thumbnail %}
+                            <img src="{{ video.thumbnail.url }}" class="card-img-top" alt="{{ video.title }}" style="height: 200px; object-fit: cover; width: 100%;" onerror="this.src='/media/default.jpg'; this.onerror=null;">
                         {% else %}
-                        <span class="badge bg-secondary">Video</span>
+                            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: var(--dark-color); color: var(--primary-color);">
+                                <i class="bi bi-play-circle" style="font-size: 3rem;"></i>
+                            </div>
                         {% endif %}
+                        <div class="position-absolute top-0 end-0 m-2">
+                            {% if video.orientation == 'portrait' %}
+                            <span class="badge bg-primary">Short</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Video</span>
+                            {% endif %}
+                        </div>
                     </div>
-                    {% endif %}
                     <div class="card-body">
-                        <h5 class="card-title text-dark">{{ video.title }}</h5>
+                        <h5 class="card-title" style="color: var(--text-color);">{{ video.title }}</h5>
                         <p class="card-text text-muted">
                             <small>
-                                {{ video.views }} views • 
+                                {{ video.views }} views •
                                 {{ video.date_posted|date:"F d, Y" }}
                             </small>
                         </p>
@@ -116,4 +122,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-{% endblock %} 
+{% endblock %}

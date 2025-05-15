@@ -3,9 +3,45 @@
 
 {% block title %}{% if form.instance.pk %}Edit{% else %}Upload{% endif %} Video - VideoShare{% endblock %}
 
+{% block styles %}
+<style>
+    /* Compact form styles */
+    .form-container .card {
+        margin-top: 1rem;
+    }
+
+    .form-container .card-body {
+        padding: 1rem 1.25rem;
+    }
+
+    .form-container .form-group {
+        margin-bottom: 0.75rem;
+    }
+
+    .form-container label {
+        margin-bottom: 0.25rem;
+    }
+
+    .form-container .mt-3 {
+        margin-top: 0.75rem !important;
+    }
+
+    .form-container .asteriskField {
+        display: none;
+    }
+
+    /* Reduce help text spacing */
+    .form-container small.text-muted {
+        margin-top: 0.1rem;
+        display: block;
+        line-height: 1.2;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-8">
+    <div class="col-md-8 form-container">
         <div class="card">
             <div class="card-header">
                 <h2 class="mb-0">{% if form.instance.pk %}Edit{% else %}Upload{% endif %} Video</h2>
@@ -23,4 +59,4 @@
         </div>
     </div>
 </div>
-{% endblock %} 
+{% endblock %}

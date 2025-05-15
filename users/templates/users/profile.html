@@ -4,37 +4,39 @@
 
 {% block styles %}
 <style>
+    /* Compact profile styles */
     .profile-header {
-        padding: 2rem 0;
-        background: #fff;
-        border-bottom: 1px solid #e5e5e5;
-        margin-bottom: 2rem;
+        padding: 1.25rem 0;
+        background-color: var(--surface-color);
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 1.25rem;
     }
 
     .profile-info {
         display: flex;
         align-items: center;
-        gap: 2rem;
+        gap: 1.5rem;
     }
 
     .profile-picture {
-        width: 120px;
-        height: 120px;
+        width: 90px;
+        height: 90px;
         border-radius: 50%;
         object-fit: cover;
     }
 
     .profile-details h1 {
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
+        font-size: 1.75rem;
+        margin-bottom: 0.25rem;
+        color: var(--text-color);
     }
 
     .profile-stats {
-        color: #606060;
+        color: var(--light-text);
         font-size: 0.9rem;
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 0.5rem;
     }
 
     .profile-stats span {
@@ -43,15 +45,21 @@
     }
 
     .profile-stats .dot {
-        margin: 0 0.5rem;
+        margin: 0 0.25rem;
         font-size: 0.5rem;
+    }
+
+    .profile-details p {
+        margin-top: 0.5rem !important;
+        margin-bottom: 0.25rem;
+        color: var(--text-color);
     }
 
     .video-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1.5rem;
-        padding: 0 1rem;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+        padding: 0 0.5rem;
     }
 
     .video-item {
@@ -69,8 +77,8 @@
         position: relative;
         width: 100%;
         padding-top: 56.25%; /* 16:9 Aspect Ratio */
-        background: #f8f8f8;
-        border-radius: 12px;
+        background-color: var(--dark-color);
+        border-radius: 8px;
         overflow: hidden;
     }
 
@@ -85,40 +93,40 @@
 
     .video-duration {
         position: absolute;
-        bottom: 8px;
-        right: 8px;
+        bottom: 6px;
+        right: 6px;
         background: rgba(0, 0, 0, 0.8);
         color: white;
-        padding: 2px 4px;
+        padding: 1px 4px;
         border-radius: 4px;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
     }
 
     .video-info {
-        padding: 0.75rem 0;
+        padding: 0.5rem 0;
     }
 
     .video-title {
-        font-size: 1rem;
+        font-size: 0.95rem;
         font-weight: 500;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.25rem;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
-        color: #0f0f0f;
+        color: var(--text-color);
     }
 
     .video-metadata {
         font-size: 0.8rem;
-        color: #606060;
+        color: var(--light-text);
     }
 
     .upload-btn {
         background-color: var(--primary-color);
         color: white;
-        padding: 0.75rem 1.5rem;
-        border-radius: 24px;
+        padding: 0.5rem 1.25rem;
+        border-radius: 20px;
         font-weight: 500;
         display: inline-flex;
         align-items: center;
@@ -127,19 +135,34 @@
     }
 
     .upload-btn:hover {
-        background-color: #e65c85;
+        background-color: var(--primary-light);
         color: white;
     }
 
     .no-videos {
         text-align: center;
-        padding: 3rem 0;
+        padding: 2rem 0;
     }
 
     .no-videos i {
-        font-size: 3rem;
-        color: #606060;
+        font-size: 2.5rem;
+        color: var(--light-text);
+        margin-bottom: 0.75rem;
+    }
+
+    .no-videos h3 {
+        margin-bottom: 0.5rem;
+        color: var(--text-color);
+    }
+
+    .no-videos p {
         margin-bottom: 1rem;
+        color: var(--light-text);
+    }
+
+    .container h2 {
+        margin-bottom: 0.75rem;
+        color: var(--text-color);
     }
 </style>
 {% endblock %}
@@ -157,7 +180,7 @@
                     <span>{{ user.subscribers.count }} subscribers</span>
                 </div>
                 {% if user.userprofile.bio %}
-                    <p class="mt-2">{{ user.userprofile.bio }}</p>
+                    <p>{{ user.userprofile.bio }}</p>
                 {% endif %}
             </div>
         </div>
@@ -165,7 +188,7 @@
 </div>
 
 <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="mb-0">Videos</h2>
         <a href="{% url 'video-create' %}" class="upload-btn">
             <i class="bi bi-cloud-upload"></i>
@@ -194,7 +217,7 @@
     <div class="no-videos">
         <i class="bi bi-camera-reels"></i>
         <h3>No videos yet</h3>
-        <p class="text-muted mb-4">Your uploaded videos will appear here</p>
+        <p class="text-muted">Your uploaded videos will appear here</p>
         <a href="{% url 'video-create' %}" class="upload-btn">
             <i class="bi bi-cloud-upload"></i>
             Upload Your First Video
@@ -202,4 +225,4 @@
     </div>
     {% endif %}
 </div>
-{% endblock %} 
+{% endblock %}

@@ -1,93 +1,571 @@
-{% extends "videos/base.html" %}
+{% extends 'videos/base.html' %}
 {% load crispy_forms_tags %}
 
 {% block title %}Settings - PiliPili{% endblock %}
 
+{% block styles %}
+<style>
+    .main-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 12px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    /* Ultra-compact settings styles */
+    .card {
+        margin-bottom: 0.5rem;
+        border-radius: 0.25rem;
+        background-color: var(--surface-color);
+        border-color: var(--border-color);
+    }
+
+    .card-header {
+        padding: 0.35rem 0.75rem;
+        background-color: var(--surface-color-hover);
+        border-color: var(--border-color);
+        color: var(--text-color);
+    }
+
+    .card-body {
+        padding: 0.5rem 0.75rem;
+        background-color: var(--surface-color);
+        color: var(--text-color);
+    }
+
+    .form-group {
+        margin-bottom: 0.35rem !important;
+    }
+
+    label {
+        margin-bottom: 0.15rem !important;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-color);
+    }
+
+    input.form-control, select.form-control, textarea.form-control {
+        padding: 0.25rem 0.5rem !important;
+        font-size: 0.9rem !important;
+        min-height: auto !important;
+        background-color: var(--input-bg);
+        color: var(--text-color);
+        border-color: var(--input-border);
+    }
+
+    textarea.form-control {
+        padding: 0.25rem 0.5rem !important;
+        min-height: 60px !important;
+    }
+
+    .mb-4 {
+        margin-bottom: 0.5rem !important;
+    }
+
+    .mt-4 {
+        margin-top: 0.5rem !important;
+    }
+
+    .mt-3 {
+        margin-top: 0.35rem !important;
+    }
+
+    .text-center {
+        margin-bottom: 0.5rem !important;
+    }
+
+    .text-center img {
+        width: 70px !important;
+        height: 70px !important;
+        margin-bottom: 0.25rem !important;
+    }
+
+    #theme-preview {
+        min-height: auto !important;
+        max-height: 50px !important;
+        padding: 0.2rem !important;
+        overflow: hidden;
+    }
+
+    .preview-header {
+        padding: 0.1rem 0.25rem !important;
+        margin-bottom: 0.1rem !important;
+        font-size: 0.7rem !important;
+        line-height: 1 !important;
+    }
+
+    .preview-content {
+        padding: 0.1rem 0.25rem !important;
+    }
+
+    .preview-content p {
+        margin-bottom: 0.1rem !important;
+        font-size: 0.7rem !important;
+        line-height: 1 !important;
+    }
+
+    .btn {
+        padding: 0.25rem 0.75rem !important;
+        font-size: 0.85rem !important;
+    }
+
+    .btn-sm {
+        padding: 0.15rem 0.5rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    /* Reduce help text spacing */
+    small.text-muted {
+        margin-top: 0 !important;
+        display: block;
+        line-height: 1.1 !important;
+        font-size: 0.7rem !important;
+        color: var(--light-text) !important;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        margin-bottom: 0.35rem;
+        color: var(--text-color);
+    }
+
+    .card-header h2 {
+        font-size: 1.1rem;
+        margin-bottom: 0;
+        font-weight: 600;
+        color: var(--text-color);
+    }
+
+    /* Make password form more compact */
+    #div_id_old_password,
+    #div_id_new_password1,
+    #div_id_new_password2 {
+        margin-bottom: 0.35rem !important;
+    }
+
+    /* Hide asterisk field */
+    .asteriskField {
+        display: none !important;
+    }
+
+    /* Reduce spacing between form elements */
+    .form-control + .form-text {
+        margin-top: 0 !important;
+    }
+
+    /* Make file input more compact */
+    input[type="file"] {
+        font-size: 0.8rem !important;
+        padding: 0.15rem !important;
+        color: var(--text-color);
+    }
+
+    /* Reduce spacing in password help text */
+    #hint_id_new_password1 ul {
+        padding-left: 1rem !important;
+        margin-bottom: 0.25rem !important;
+        margin-top: 0.1rem !important;
+    }
+
+    #hint_id_new_password1 li {
+        margin-bottom: 0 !important;
+        line-height: 1.1 !important;
+        font-size: 0.7rem !important;
+        color: var(--light-text);
+    }
+
+    /* Make the password fields more compact */
+    #div_id_old_password .form-control,
+    #div_id_new_password1 .form-control,
+    #div_id_new_password2 .form-control {
+        height: 30px !important;
+    }
+
+    /* Reduce spacing between password fields */
+    #div_id_old_password,
+    #div_id_new_password1,
+    #div_id_new_password2 {
+        margin-bottom: 0.25rem !important;
+    }
+
+    /* Make the entire form more compact */
+    .form-control {
+        height: auto !important;
+    }
+
+    /* Reduce spacing in file input */
+    .custom-file-label {
+        height: auto !important;
+        padding: 0.25rem 0.5rem !important;
+        font-size: 0.8rem !important;
+    }
+
+    /* Styling for section dividers */
+    hr {
+        border-color: var(--border-color);
+        margin: 0.5rem 0 !important;
+    }
+
+    /* Section headings */
+    .section-heading {
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        margin: 0.5rem 0 0.75rem 0 !important;
+        color: var(--primary-color);
+    }
+
+    /* Make the combined card more compact */
+    .combined-card .card-body {
+        padding: 0.75rem !important;
+    }
+
+    /* Reduce spacing between sections */
+    .section {
+        margin-bottom: 0.75rem !important;
+    }
+
+    /* Sidebar styling */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1040; /* Higher than navbar and dashboard content */
+        padding-top: 70px; /* Increased to account for navbar height */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        background-color: var(--surface-color);
+        width: 250px;
+        transition: all 0.3s ease;
+        overflow-y: auto; /* Allow scrolling within sidebar */
+        height: 100vh; /* Full viewport height */
+        opacity: 1 !important; /* Ensure it's fully opaque */
+    }
+
+    /* Ensure sidebar items are fully opaque */
+    .sidebar * {
+        opacity: 1 !important;
+    }
+
+    /* Collapsed sidebar styles */
+    .sidebar.collapsed {
+        width: 60px;
+        overflow-x: hidden;
+    }
+
+    .sidebar.collapsed .nav-link span {
+        display: none;
+    }
+
+    .sidebar.collapsed .nav-link {
+        text-align: center;
+        padding: 0.75rem 0;
+        justify-content: center;
+    }
+
+    .sidebar.collapsed .nav-link i {
+        margin-right: 0;
+        font-size: 1.25rem;
+    }
+
+    /* Center the toggle button when sidebar is collapsed */
+    .sidebar.collapsed .sidebar-header {
+        justify-content: center;
+    }
+
+    /* Make toggle button pink when sidebar is collapsed */
+    .sidebar.collapsed .sidebar-toggle-top {
+        background-color: var(--primary-color);
+        color: white !important;
+        border-color: var(--primary-color);
+    }
+
+    .sidebar .nav-link {
+        font-weight: 500;
+        color: var(--text-color);
+        padding: 0.75rem 1.25rem;
+        margin: 0.2rem 0.5rem;
+        border-radius: 0.25rem;
+        display: flex;
+        align-items: center;
+        transition: all 0.2s;
+        background-color: var(--surface-color);
+        opacity: 1 !important;
+    }
+
+    .sidebar .nav-link i {
+        color: var(--primary-color);
+        margin-right: 0.75rem;
+        font-size: 1.1rem;
+    }
+
+    .sidebar .nav-link.active {
+        color: var(--primary-color) !important;
+        background-color: var(--surface-color);
+        font-weight: 600;
+        box-shadow: 0 2px 5px var(--shadow-color);
+        border-left: 3px solid var(--primary-color);
+    }
+
+    .sidebar .nav-link.active i {
+        color: var(--primary-color);
+    }
+
+    .sidebar .nav-link:hover {
+        color: var(--primary-color) !important;
+        background-color: rgba(var(--primary-color-rgb), 0.05);
+    }
+
+    /* Main content area */
+    main {
+        padding-top: 1.5rem;
+        background-color: var(--secondary-color);
+        min-height: 100vh;
+        transition: all 0.3s ease;
+    }
+
+    main.expanded {
+        margin-left: 60px !important;
+    }
+
+    /* Sidebar header */
+    .sidebar-header {
+        display: flex;
+        justify-content: flex-end;
+        padding: 10px;
+        margin-bottom: 10px;
+        background-color: transparent;
+    }
+
+    /* Sidebar toggle button */
+    .sidebar-toggle-top {
+        background-color: var(--surface-color);
+        color: var(--primary-color) !important;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        opacity: 1; /* Ensure it's fully opaque */
+        box-shadow: 0 1px 3px var(--shadow-color);
+    }
+
+    .sidebar-toggle-top:hover {
+        background-color: var(--surface-color-hover);
+        color: var(--primary-color) !important;
+        border-color: var(--border-color);
+    }
+
+    .sidebar-toggle-top i {
+        font-size: 1.25rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <!-- Profile Settings Card -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h2 class="mb-0">Profile Settings</h2>
-            </div>
-            <div class="card-body">
-                <div class="text-center mb-4">
-                    <img src="{{ profile.profile_picture.url }}" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;" alt="Profile Picture">
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block sidebar">
+            <div class="position-sticky">
+                <div class="sidebar-header">
+                    <button id="sidebarToggle" class="sidebar-toggle-top" aria-label="Toggle sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
                 </div>
-                <form method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {{ profile_form.bio|as_crispy_field }}
-                    {{ profile_form.profile_picture|as_crispy_field }}
-                    <div class="mt-3">
-                        <button type="submit" name="profile_submit" class="btn btn-primary">Update Profile</button>
-                    </div>
-                </form>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">
+                            <i class="bi bi-house-door"></i>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'your_videos' %}">
+                            <i class="bi bi-collection-play"></i>
+                            <span>Your Videos</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'watch_history' %}">
+                            <i class="bi bi-clock-history"></i>
+                            <span>Watch History</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'saved_videos' %}">
+                            <i class="bi bi-bookmark"></i>
+                            <span>Saved Videos</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'liked_videos' %}">
+                            <i class="bi bi-heart"></i>
+                            <span>Liked Videos</span>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% if not user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            <span>Login</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register' %}">
+                            <i class="bi bi-person-plus"></i>
+                            <span>Register</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
 
-        <!-- Theme Settings Card -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h2 class="mb-0">Theme Settings</h2>
-            </div>
-            <div class="card-body">
-                <form method="POST">
-                    {% csrf_token %}
-                    <div class="row">
-                        <div class="col-md-6">
-                            {{ profile_form.dark_mode|as_crispy_field }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ profile_form.theme|as_crispy_field }}
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <h5>Theme Preview</h5>
-                        <div class="row mt-3">
-                            <div class="col">
-                                <div id="theme-preview" class="p-3 rounded" style="border: 1px solid #ddd; min-height: 100px;">
-                                    <div class="preview-header p-2 mb-2 rounded" style="background-color: var(--primary-color); color: white;">
-                                        Header Preview
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="main-content">
+                <div class="page-header">
+                    <h2 class="section-title">Settings</h2>
+                </div>
+
+                <div class="row justify-content-center">
+                    <div class="col-md-7">
+                        <!-- Combined Profile Settings Card -->
+                        <div class="card combined-card">
+                            <div class="card-header">
+                                <h2 class="mb-0">Profile Settings</h2>
+                            </div>
+                            <div class="card-body">
+                                <!-- Profile Section -->
+                                <div class="section">
+                                    <div class="row">
+                                        <div class="col-md-3 text-center">
+                                            <img src="{{ profile.profile_picture.url }}" class="rounded-circle" style="width: 70px; height: 70px; object-fit: cover;" alt="Profile Picture">
+                                        </div>
+                                        <div class="col-md-9">
+                                            <form method="POST" enctype="multipart/form-data">
+                                                {% csrf_token %}
+                                                {{ profile_form.bio|as_crispy_field }}
+                                                {{ profile_form.profile_picture|as_crispy_field }}
+                                                <div class="mt-2">
+                                                    <button type="submit" name="profile_submit" class="btn btn-primary">Update Profile</button>
+                                                </div>
+                                            </form>
+                                        </div>
                                     </div>
-                                    <div class="preview-content p-2 rounded" style="background: white; border: 1px solid #eee;">
-                                        <p style="color: var(--text-color);">This is how your selected theme will look.</p>
-                                        <button class="btn btn-sm" style="background-color: var(--primary-color); color: white;">Button Example</button>
-                                    </div>
+                                </div>
+
+                                <hr>
+
+                                <!-- Theme Settings Section -->
+                                <div class="section">
+                                    <h5 class="section-heading">Theme Settings</h5>
+                                    <form method="POST">
+                                        {% csrf_token %}
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                {{ profile_form.dark_mode|as_crispy_field }}
+                                            </div>
+                                            <div class="col-md-6">
+                                                {{ profile_form.theme|as_crispy_field }}
+                                            </div>
+                                        </div>
+
+                                        <div class="row mt-2 align-items-center">
+                                            <div class="col-md-3">
+                                                <small style="font-size: 0.8rem; font-weight: 500; color: var(--text-color);">Theme Preview:</small>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <div id="theme-preview" class="rounded" style="border: 1px solid var(--border-color); max-height: 50px;">
+                                                    <div class="preview-header rounded" style="background-color: var(--primary-color); color: white;">
+                                                        Header
+                                                    </div>
+                                                    <div class="preview-content rounded" style="background-color: var(--surface-color); border: 1px solid var(--border-color);">
+                                                        <p style="color: var(--text-color);">Theme preview</p>
+                                                        <button class="btn btn-sm" style="background-color: var(--primary-color); color: white; padding: 0 0.25rem; font-size: 0.7rem; line-height: 1;">Button</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-2">
+                                            <button type="submit" name="theme_submit" class="btn btn-primary">Update Theme</button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <hr>
+
+                                <!-- Password Change Section -->
+                                <div class="section">
+                                    <h5 class="section-heading">Change Password</h5>
+                                    <form method="POST">
+                                        {% csrf_token %}
+                                        {{ password_form|crispy }}
+                                        <div class="mt-2">
+                                            <button type="submit" name="password_submit" class="btn btn-primary">Change Password</button>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="mt-3">
-                        <button type="submit" name="theme_submit" class="btn btn-primary">Update Theme</button>
-                    </div>
-                </form>
+                </div>
             </div>
-        </div>
-
-        <!-- Password Change Card -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="mb-0">Change Password</h2>
-            </div>
-            <div class="card-body">
-                <form method="POST">
-                    {% csrf_token %}
-                    {{ password_form|crispy }}
-                    <div class="mt-3">
-                        <button type="submit" name="password_submit" class="btn btn-primary">Change Password</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        </main>
     </div>
 </div>
 
-{% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('main');
+
+        // Check if the sidebar is collapsed in localStorage
+        const isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+
+        // Apply the initial state
+        if (isSidebarCollapsed) {
+            sidebar.classList.add('collapsed');
+            mainContent.classList.add('expanded');
+        }
+
+        // Update the toggle button icon
+        function updateToggleIcon() {
+            const icon = sidebarToggle.querySelector('i');
+            // Always use the hamburger menu icon
+            icon.className = 'bi bi-list';
+        }
+
+        // Initialize the icon
+        updateToggleIcon();
+
+        // Add click event to toggle the sidebar
+        sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+
+            // Save the state to localStorage
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+
+            // Update the icon
+            updateToggleIcon();
+        });
+
+        // Theme preview functionality
         const themeSelect = document.getElementById('id_theme');
         const darkModeCheckbox = document.getElementById('id_dark_mode');
         const themePreview = document.getElementById('theme-preview');
@@ -95,17 +573,18 @@
         const previewContent = themePreview.querySelector('.preview-content');
         const previewButton = previewContent.querySelector('.btn');
         const previewText = previewContent.querySelector('p');
-        
+
         function updatePreview() {
             const isDarkMode = darkModeCheckbox.checked;
             const selectedTheme = themeSelect.value;
-            
+
             // Default theme colors
             let primaryColor = '#fb7299';  // Pink (default)
             let secondaryColor = isDarkMode ? '#252525' : '#f4f4f5';
             let textColor = isDarkMode ? '#f5f5f7' : '#18191c';
             let cardBg = isDarkMode ? '#333333' : '#ffffff';
-            
+            let borderColor = isDarkMode ? '#444444' : '#dddddd';
+
             // Set theme-specific colors
             if (selectedTheme === 'purple') {
                 primaryColor = '#7952b3';
@@ -116,28 +595,27 @@
             } else if (selectedTheme === 'orange') {
                 primaryColor = '#e67e22';
             }
-            
+
             // Update preview
             themePreview.style.backgroundColor = secondaryColor;
-            themePreview.style.border = isDarkMode ? '1px solid #444' : '1px solid #ddd';
-            
+            themePreview.style.border = `1px solid ${borderColor}`;
+
             previewHeader.style.backgroundColor = primaryColor;
-            
+
             previewContent.style.backgroundColor = cardBg;
-            previewContent.style.border = isDarkMode ? '1px solid #444' : '1px solid #eee';
-            
+            previewContent.style.border = `1px solid ${borderColor}`;
+
             previewText.style.color = textColor;
-            
+
             previewButton.style.backgroundColor = primaryColor;
         }
-        
+
         // Update preview on change
         themeSelect.addEventListener('change', updatePreview);
         darkModeCheckbox.addEventListener('change', updatePreview);
-        
+
         // Initial preview update
         updatePreview();
     });
 </script>
 {% endblock %}
-{% endblock %} 

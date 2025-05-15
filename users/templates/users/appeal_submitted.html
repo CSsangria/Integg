@@ -1,0 +1,27 @@
+{% extends 'videos/base.html' %}
+
+{% block title %}Appeal Submitted - PiliPili{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card mt-4">
+            <div class="card-header" style="background-color: #5a3d99; color: white;">
+                <h3 class="mb-0">Appeal Submitted</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success" role="alert">
+                    <h4 class="alert-heading">Thank You!</h4>
+                    <p>Your appeal has been successfully submitted and will be reviewed by our team.</p>
+                    <hr>
+                    <p class="mb-0">We'll notify you about the status of your appeal as soon as possible.</p>
+                </div>
+                
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{% url 'login' %}" class="btn" style="background-color: #7952b3; color: white;">Return to Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

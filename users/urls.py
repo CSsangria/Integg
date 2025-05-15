@@ -9,5 +9,6 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('settings/', views.settings, name='settings'),
     path('submit-appeal/', views.submit_appeal, name='submit-appeal'),
+    path('appeal-submitted/', views.appeal_submitted, name='appeal-submitted'),
     path('admin/appeals/', views.admin_appeals, name='admin-appeals'),
 ] 

@@ -62,6 +62,30 @@
         object-fit: cover;
     }
 
+    .default-thumbnail {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--dark-color);
+        color: var(--primary-purple);
+    }
+
+    .default-thumbnail i {
+        font-size: 3rem;
+        opacity: 0.7;
+        transition: all 0.3s ease;
+    }
+
+    .video-item:hover .default-thumbnail i {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
     .video-duration {
         position: absolute;
         bottom: 8px;
@@ -73,7 +97,7 @@
         font-size: 12px;
         font-weight: 500;
     }
-    
+
     .video-badge {
         position: absolute;
         top: 8px;
@@ -150,17 +174,17 @@
             grid-template-columns: 1fr;
         }
     }
-    
+
     .alert-purple {
         background-color: rgba(121, 82, 179, 0.1);
         border-color: var(--primary-purple);
         color: var(--dark-purple);
     }
-    
+
     .search-suggestion {
         color: var(--dark-purple);
     }
-    
+
     .search-suggestion li {
         margin-bottom: 5px;
     }
@@ -187,7 +211,13 @@
             {% for video in videos %}
             <a href="{% url 'video-detail' video.id %}" class="video-item">
                 <div class="thumbnail-container">
-                    <img src="{{ video.thumbnail.url }}" class="video-thumbnail" alt="{{ video.title }}">
+                    {% if video.thumbnail %}
+                        <img src="{{ video.thumbnail.url }}" class="video-thumbnail" alt="{{ video.title }}" onerror="this.src='/media/default.jpg'; this.onerror=null;">
+                    {% else %}
+                        <div class="default-thumbnail">
+                            <i class="bi bi-play-circle"></i>
+                        </div>
+                    {% endif %}
                     {% if video.orientation == 'portrait' %}
                         <span class="video-badge bg-primary">Short</span>
                     {% endif %}
@@ -228,4 +258,4 @@
         {% endif %}
     {% endif %}
 </div>
-{% endblock %} 
+{% endblock %}

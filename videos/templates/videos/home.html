@@ -14,19 +14,27 @@
         --bright-purple: var(--primary-color);
         --hover-purple: var(--primary-color);
     }
-    
+
     /* Sidebar styling */
     .sidebar {
         position: fixed;
         top: 0;
         bottom: 0;
         left: 0;
-        z-index: 100;
-        padding: 48px 0 0;
-        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
-        background-color: var(--card-bg);
+        z-index: 1040; /* Higher than navbar and dashboard content */
+        padding-top: 70px; /* Increased to account for navbar height */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        background-color: var(--surface-color);
         width: 250px;
         transition: all 0.3s ease;
+        overflow-y: auto; /* Allow scrolling within sidebar */
+        height: 100vh; /* Full viewport height */
+        opacity: 1 !important; /* Ensure it's fully opaque */
+    }
+
+    /* Ensure sidebar items are fully opaque */
+    .sidebar * {
+        opacity: 1 !important;
     }
 
     /* Collapsed sidebar styles */
@@ -34,11 +42,11 @@
         width: 60px;
         overflow-x: hidden;
     }
-    
+
     .sidebar.collapsed .nav-link span {
         display: none;
     }
-    
+
     .sidebar.collapsed .nav-link {
         text-align: center;
         padding: 0.75rem 0;
@@ -49,7 +57,7 @@
         margin-right: 0;
         font-size: 1.25rem;
     }
-    
+
     .sidebar .nav-link {
         font-weight: 500;
         color: var(--text-color);
@@ -59,58 +67,72 @@
         display: flex;
         align-items: center;
         transition: all 0.2s;
+        background-color: var(--surface-color);
+        opacity: 1 !important;
     }
-    
+
     .sidebar .nav-link i {
         color: var(--primary-color);
         margin-right: 0.75rem;
         font-size: 1.1rem;
     }
-    
+
     .sidebar .nav-link.active {
         color: var(--primary-color) !important;
-        background-color: rgba(var(--primary-color-rgb), 0.1);
+        background-color: white;
         font-weight: 600;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        border-left: 3px solid var(--primary-color);
     }
 
     .sidebar .nav-link.active i {
         color: var(--primary-color);
     }
-    
+
     .sidebar .nav-link:hover {
         color: var(--primary-color) !important;
         background-color: rgba(var(--primary-color-rgb), 0.05);
     }
-    
+
     /* Main content area */
     main {
         padding-top: 1.5rem;
         background-color: var(--secondary-color);
         min-height: 100vh;
         transition: all 0.3s ease;
+        position: relative;
+        z-index: 1015; /* Higher than navbar but lower than sidebar */
     }
-    
+
     main.expanded {
         margin-left: 60px !important;
     }
-    
+
     /* Make the main content wider */
     main .container-fluid {
         max-width: 1900px;
         margin: 0 auto;
+        position: relative;
+        z-index: 1015; /* Same as main */
     }
-    
+
+    /* Content area */
+    .content-area {
+        position: relative;
+        z-index: 1015; /* Same as main */
+    }
+
     .page-header {
         border-bottom: 2px solid rgba(var(--primary-color-rgb), 0.2);
         margin-bottom: 1.5rem;
         padding-bottom: 0.75rem;
     }
-    
+
     .page-header h1 {
         color: var(--text-color);
         font-weight: 600;
     }
-    
+
     /* Card styling */
     .card {
         transition: transform 0.2s, box-shadow 0.2s;
@@ -118,23 +140,33 @@
         border-radius: 0.5rem;
         margin-bottom: 1.5rem;
         height: 100%;
+        position: relative;
+        z-index: 1015; /* Same as main */
     }
-    
+
     .card:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 15px rgba(var(--primary-color-rgb), 0.1) !important;
     }
-    
+
     .shadow-sm {
         box-shadow: 0 .125rem .375rem rgba(var(--primary-color-rgb), 0.15) !important;
     }
-    
+
     /* Video grid and item styling */
     .video-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 24px;
         margin-bottom: 2rem;
+        position: relative;
+        z-index: 1015; /* Same as main */
+    }
+
+    /* Modern card styling */
+    .modern-card {
+        position: relative;
+        z-index: 1015; /* Same as main */
     }
 
     .video-item {
@@ -144,7 +176,7 @@
         color: inherit;
         transition: transform 0.2s;
     }
-    
+
     .video-item:hover {
         transform: translateY(-5px);
     }
@@ -166,6 +198,30 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+    }
+
+    .default-thumbnail {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--dark-color);
+        color: var(--primary-color);
+    }
+
+    .default-thumbnail i {
+        font-size: 3rem;
+        opacity: 0.7;
+        transition: all 0.3s ease;
+    }
+
+    .video-item:hover .default-thumbnail i {
+        opacity: 1;
+        transform: scale(1.1);
     }
 
     .video-duration {
@@ -237,7 +293,7 @@
         display: inline-block;
         white-space: nowrap;
     }
-    
+
     .video-time {
         display: flex;
         flex-wrap: nowrap;
@@ -259,7 +315,13 @@
     .featured-item .video-title {
         font-size: 18px;
     }
-    
+
+    /* Right sidebar */
+    .right-sidebar {
+        position: relative;
+        z-index: 1015; /* Same as main */
+    }
+
     /* Sidebar cards */
     .sidebar-card {
         background-color: var(--card-bg);
@@ -267,8 +329,10 @@
         margin-bottom: 1.5rem;
         box-shadow: 0 .125rem .375rem rgba(0, 0, 0, 0.15);
         overflow: hidden;
+        position: relative;
+        z-index: 1015; /* Same as main */
     }
-    
+
     .sidebar-header {
         padding: 12px 16px;
         display: flex;
@@ -277,24 +341,24 @@
         border-bottom: 1px solid var(--border-color);
         background-color: rgba(var(--primary-color-rgb), 0.05);
     }
-    
+
     .sidebar-title {
         font-size: 16px;
         font-weight: 600;
         margin: 0;
         color: var(--text-color);
     }
-    
+
     .view-all {
         font-size: 14px;
         color: var(--primary-color);
         text-decoration: none;
     }
-    
+
     .sidebar-content {
         padding: 12px;
     }
-    
+
     .sidebar-video {
         display: flex;
         gap: 12px;
@@ -305,17 +369,17 @@
         color: inherit;
         transition: transform 0.2s;
     }
-    
+
     .sidebar-video:hover {
         transform: translateY(-2px);
     }
-    
+
     .sidebar-video:last-child {
         margin-bottom: 0;
         padding-bottom: 0;
         border-bottom: none;
     }
-    
+
     .sidebar-thumbnail {
         width: 120px;
         height: 68px;
@@ -323,12 +387,12 @@
         object-fit: cover;
         flex-shrink: 0;
     }
-    
+
     .sidebar-video-info {
         flex: 1;
         min-width: 0;
     }
-    
+
     .sidebar-video-title {
         font-size: 14px;
         font-weight: 500;
@@ -339,30 +403,30 @@
         overflow: hidden;
         color: var(--text-color);
     }
-    
+
     .sidebar-video-channel {
         font-size: 12px;
         color: var(--light-text);
         margin-bottom: 2px;
     }
-    
+
     .sidebar-video-stats {
         font-size: 12px;
         color: var(--light-text);
     }
-    
+
     .sidebar-empty {
         padding: 24px 16px;
         text-align: center;
         color: var(--light-text);
     }
-    
+
     .sidebar-empty-icon {
         font-size: 24px;
         margin-bottom: 8px;
         color: var(--primary-color);
     }
-    
+
     .clear-history {
         display: block;
         text-align: center;
@@ -371,11 +435,11 @@
         margin-top: 8px;
         text-decoration: none;
     }
-    
+
     .clear-history:hover {
         color: var(--dark-color);
     }
-    
+
     /* Media queries for responsive grid */
     @media (min-width: 1800px) {
         .video-grid {
@@ -403,18 +467,18 @@
         .video-grid {
             grid-template-columns: 1fr;
         }
-        
+
         .sidebar {
             position: static;
             height: auto;
             padding-top: 0;
         }
-        
+
         main {
             padding-top: 1rem;
         }
     }
-    
+
     /* Toggle button styling */
     #sidebarToggle {
         background-color: transparent;
@@ -424,33 +488,96 @@
         transition: all 0.2s;
         padding: 0.25rem 0.5rem;
     }
-    
+
     #sidebarToggle:hover {
         background-color: rgba(var(--primary-color-rgb), 0.1);
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
-    
+
     #sidebarToggle i {
         font-size: 1.25rem;
     }
-    
+
     /* Make section headings slightly larger */
     .mb-3 h2.h4 {
         font-size: 1.4rem;
         margin-bottom: 1rem;
     }
-    
-    /* Sidebar toggle top position */
-    .sidebar-toggle-top {
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        z-index: 1000;
+
+    /* Sidebar header */
+    .sidebar-header {
+        display: flex;
+        justify-content: flex-end;
+        padding: 10px;
+        margin-bottom: 10px;
+        background-color: transparent;
+    }
+
+    /* Center the toggle button when sidebar is collapsed */
+    .sidebar.collapsed .sidebar-header {
+        justify-content: center;
+    }
+
+    /* Make toggle button themed when sidebar is collapsed */
+    .sidebar.collapsed .sidebar-toggle-top {
+        background-color: var(--primary-color);
+        color: white !important;
+        border-color: var(--primary-color);
     }
     
+    /* Style the sidebar nav links */
+    .sidebar .nav-link i {
+        color: var(--primary-color);
+        margin-right: 0.75rem;
+        font-size: 1.1rem;
+    }
+
+    .sidebar .nav-link.active {
+        color: var(--primary-color) !important;
+        background-color: var(--surface-color);
+        font-weight: 600;
+        box-shadow: 0 2px 5px var(--shadow-color);
+        border-left: 3px solid var(--primary-color);
+    }
+
+    .sidebar .nav-link.active i {
+        color: var(--primary-color);
+    }
+
+    .sidebar .nav-link:hover {
+        color: var(--primary-color) !important;
+        background-color: rgba(var(--primary-color-rgb), 0.05);
+    }
+
+    /* Sidebar toggle button */
+    .sidebar-toggle-top {
+        background-color: var(--surface-color);
+        color: var(--primary-color) !important;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        opacity: 1; /* Ensure it's fully opaque */
+        box-shadow: 0 1px 3px var(--shadow-color);
+    }
+
+    .sidebar-toggle-top:hover {
+        background-color: var(--surface-color-hover);
+        color: var(--primary-color) !important;
+        border-color: var(--border-color);
+    }
+
+    .sidebar-toggle-top i {
+        font-size: 1.25rem;
+    }
+
     /* Additional space for navigation to prevent overlap */
     .nav.flex-column {
-        margin-top: 45px !important;
+        margin-top: 0 !important; /* No need for extra margin since we increased padding-top of sidebar */
     }
 </style>
 {% endblock %}
@@ -459,12 +586,13 @@
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-            <div class="position-sticky pt-4">
-                <button id="sidebarToggle" class="btn btn-sm sidebar-toggle-top">
-                    <i class="bi bi-list"></i>
-                </button>
-                
+        <div class="col-md-3 col-lg-2 d-md-block sidebar">
+            <div class="position-sticky">
+                <div class="sidebar-header">
+                    <button id="sidebarToggle" class="sidebar-toggle-top" aria-label="Toggle sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                </div>
                 <ul class="nav flex-column">
                     <li class="nav-item">
                         <a class="nav-link active" href="{% url 'home' %}">
@@ -498,7 +626,7 @@
                         </a>
                     </li>
                     {% endif %}
-                    
+
                     {% if not user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'login' %}">
@@ -524,7 +652,7 @@
                     <h1 class="h2">Home</h1>
                 </div>
             </div>
-            
+
             <div class="content-area">
     {% if featured_video %}
     <div class="featured-section">
@@ -535,7 +663,13 @@
                         <div class="card-body p-0">
             <a href="{% url 'video-detail' featured_video.id %}" class="video-item featured-item">
                 <div class="thumbnail-container">
-                                    <img src="{{ featured_video.thumbnail.url }}" class="video-thumbnail" alt="{{ featured_video.title }}" loading="lazy">
+                    {% if featured_video.thumbnail %}
+                        <img src="{{ featured_video.thumbnail.url }}" class="video-thumbnail" alt="{{ featured_video.title }}" loading="lazy" onerror="this.src='/media/default.jpg'; this.onerror=null;">
+                    {% else %}
+                        <div class="default-thumbnail">
+                            <i class="bi bi-play-circle"></i>
+                        </div>
+                    {% endif %}
                     <div class="video-duration">{{ featured_video.format_duration }}</div>
                 </div>
                                 <div class="video-info p-3">
@@ -585,7 +719,13 @@
                             <div class="card-body p-0">
         <a href="{% url 'video-detail' video.id %}" class="video-item">
             <div class="thumbnail-container">
-                                        <img src="{{ video.thumbnail.url }}" class="video-thumbnail" alt="{{ video.title }}" loading="lazy">
+                {% if video.thumbnail %}
+                    <img src="{{ video.thumbnail.url }}" class="video-thumbnail" alt="{{ video.title }}" loading="lazy" onerror="this.src='/media/default.jpg'; this.onerror=null;">
+                {% else %}
+                    <div class="default-thumbnail">
+                        <i class="bi bi-play-circle"></i>
+                    </div>
+                {% endif %}
                 <div class="video-duration">{{ video.format_duration }}</div>
             </div>
             <div class="video-info">
@@ -633,7 +773,13 @@
                             <div class="card-body p-0">
         <a href="{% url 'video-detail' video.id %}" class="video-item">
             <div class="thumbnail-container">
-                                        <img src="{{ video.thumbnail.url }}" class="video-thumbnail" alt="{{ video.title }}" loading="lazy">
+                {% if video.thumbnail %}
+                    <img src="{{ video.thumbnail.url }}" class="video-thumbnail" alt="{{ video.title }}" loading="lazy" onerror="this.src='/media/default.jpg'; this.onerror=null;">
+                {% else %}
+                    <div class="default-thumbnail">
+                        <i class="bi bi-play-circle"></i>
+                    </div>
+                {% endif %}
                 <div class="video-duration">{{ video.format_duration }}</div>
             </div>
             <div class="video-info">
@@ -654,7 +800,7 @@
                         </div>
                         {% endfor %}
                     </div>
-                    
+
                     <!-- Skeleton Loading Template (hidden when content is loaded) -->
                     <div id="skeleton-loader-popular" class="video-grid" style="display: none;">
                         {% for i in "1234" %}
@@ -671,7 +817,7 @@
                     </div>
                 </div>
             </div>
-            
+
             {% if user.is_authenticated %}
             <div class="right-sidebar">
                 <div class="sidebar-card">
@@ -683,7 +829,13 @@
                         {% if watch_history %}
                             {% for item in watch_history %}
                             <a href="{% url 'video-detail' item.video.id %}" class="sidebar-video">
-                                <img src="{{ item.video.thumbnail.url }}" class="sidebar-thumbnail" alt="{{ item.video.title }}">
+                                {% if item.video.thumbnail %}
+                                    <img src="{{ item.video.thumbnail.url }}" class="sidebar-thumbnail" alt="{{ item.video.title }}" onerror="this.src='/media/default.jpg'; this.onerror=null;">
+                                {% else %}
+                                    <div class="sidebar-thumbnail default-thumbnail">
+                                        <i class="bi bi-play-circle"></i>
+                                    </div>
+                                {% endif %}
                                 <div class="sidebar-video-info">
                                     <h4 class="sidebar-video-title">{{ item.video.title }}</h4>
                                     <div class="sidebar-video-channel">{{ item.video.author.username }}</div>
@@ -712,7 +864,13 @@
                         {% if saved_videos %}
                             {% for item in saved_videos %}
                             <a href="{% url 'video-detail' item.video.id %}" class="sidebar-video">
-                                <img src="{{ item.video.thumbnail.url }}" class="sidebar-thumbnail" alt="{{ item.video.title }}">
+                                {% if item.video.thumbnail %}
+                                    <img src="{{ item.video.thumbnail.url }}" class="sidebar-thumbnail" alt="{{ item.video.title }}" onerror="this.src='/media/default.jpg'; this.onerror=null;">
+                                {% else %}
+                                    <div class="sidebar-thumbnail default-thumbnail">
+                                        <i class="bi bi-play-circle"></i>
+                                    </div>
+                                {% endif %}
                                 <div class="sidebar-video-info">
                                     <h4 class="sidebar-video-title">{{ item.video.title }}</h4>
                                     <div class="sidebar-video-channel">{{ item.video.author.username }}</div>
@@ -738,7 +896,13 @@
                         {% if liked_videos %}
                             {% for video in liked_videos %}
                             <a href="{% url 'video-detail' video.id %}" class="sidebar-video">
-                                <img src="{{ video.thumbnail.url }}" class="sidebar-thumbnail" alt="{{ video.title }}">
+                                {% if video.thumbnail %}
+                                    <img src="{{ video.thumbnail.url }}" class="sidebar-thumbnail" alt="{{ video.title }}" onerror="this.src='/media/default.jpg'; this.onerror=null;">
+                                {% else %}
+                                    <div class="sidebar-thumbnail default-thumbnail">
+                                        <i class="bi bi-play-circle"></i>
+                                    </div>
+                                {% endif %}
                                 <div class="sidebar-video-info">
                                     <h4 class="sidebar-video-title">{{ video.title }}</h4>
                                     <div class="sidebar-video-channel">{{ video.author.username }}</div>
@@ -767,43 +931,38 @@
         const sidebarToggle = document.getElementById('sidebarToggle');
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('main');
-        
+
         // Check if the sidebar is collapsed in localStorage
         const isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-        
+
         // Apply the initial state
         if (isSidebarCollapsed) {
             sidebar.classList.add('collapsed');
             mainContent.classList.add('expanded');
         }
-        
+
         // Update the toggle button icon
         function updateToggleIcon() {
             const icon = sidebarToggle.querySelector('i');
-            if (sidebar.classList.contains('collapsed')) {
-                icon.classList.remove('bi-list');
-                icon.classList.add('bi-arrow-right-square');
-            } else {
-                icon.classList.remove('bi-arrow-right-square');
-                icon.classList.add('bi-list');
-            }
+            // Always use the hamburger menu icon
+            icon.className = 'bi bi-list';
         }
-        
+
         // Initialize the icon
         updateToggleIcon();
-        
+
         // Add click event to toggle the sidebar
         sidebarToggle.addEventListener('click', function() {
             sidebar.classList.toggle('collapsed');
             mainContent.classList.toggle('expanded');
-            
+
             // Save the state to localStorage
             localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-            
+
             // Update the icon
             updateToggleIcon();
         });
-        
+
         // Remove the collapse behavior from Bootstrap's sidebar elements
         if (typeof bootstrap !== 'undefined') {
             const sidebarElement = document.querySelector('.sidebar');
@@ -814,7 +973,7 @@
                 }
             }
         }
-        
+
         // Set links to not trigger sidebar collapses
         const navLinks = document.querySelectorAll('.sidebar .nav-link');
         navLinks.forEach(link => {
@@ -827,7 +986,7 @@
             // Remove any role="button" attributes
             link.removeAttribute('role');
         });
-        
+
         // Skeleton loading handling
         function handleSkeletonLoading() {
             // Get all the skeleton loaders
@@ -836,25 +995,25 @@
                 document.getElementById('skeleton-loader-recent'),
                 document.getElementById('skeleton-loader-popular')
             ];
-            
+
             // Show skeleton loaders before content loads
             skeletonLoaders.forEach(loader => {
                 if (loader) loader.style.display = 'grid';
             });
-            
+
             // Hide real content initially
             const videoGrids = document.querySelectorAll('.video-grid');
             const featuredSection = document.querySelector('.featured-section');
-            
+
             // Add content-loading class to all content
             if (featuredSection && skeletonLoaders[0]) {
                 featuredSection.classList.add('content-loading');
             }
-            
+
             videoGrids.forEach(grid => {
                 grid.classList.add('content-loading');
             });
-            
+
             // After content is loaded, hide skeletons and show content
             window.addEventListener('load', function() {
                 // Hide skeleton loaders
@@ -862,7 +1021,7 @@
                     if (loader) {
                         setTimeout(() => {
                             loader.style.display = 'none';
-                            
+
                             // Show the corresponding content
                             if (loader.id === 'skeleton-loader-featured' && featuredSection) {
                                 featuredSection.classList.remove('content-loading');
@@ -871,7 +1030,7 @@
                         }, 300); // Small delay for smooth transition
                     }
                 });
-                
+
                 // Show video grids
                 videoGrids.forEach(grid => {
                     setTimeout(() => {
@@ -881,9 +1040,9 @@
                 });
             });
         }
-        
+
         // Initialize skeleton loading
         handleSkeletonLoading();
     });
 </script>
-{% endblock %} 
+{% endblock %}

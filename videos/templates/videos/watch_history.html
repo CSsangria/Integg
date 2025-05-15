@@ -49,6 +49,30 @@
         object-fit: cover;
     }
 
+    .default-thumbnail {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--dark-color);
+        color: var(--primary-color);
+    }
+
+    .default-thumbnail i {
+        font-size: 3rem;
+        opacity: 0.7;
+        transition: all 0.3s ease;
+    }
+
+    .video-item:hover .default-thumbnail i {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
     .video-duration {
         position: absolute;
         bottom: 8px;
@@ -137,42 +161,62 @@
             grid-template-columns: 1fr;
         }
     }
-    
+
     /* Sidebar styling */
     .sidebar {
         position: fixed;
         top: 0;
         bottom: 0;
         left: 0;
-        z-index: 100;
-        padding: 48px 0 0;
-        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
-        background-color: var(--card-bg);
+        z-index: 1040; /* Higher than navbar and dashboard content */
+        padding-top: 70px; /* Increased to account for navbar height */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        background-color: var(--surface-color);
         width: 250px;
         transition: all 0.3s ease;
+        overflow-y: auto; /* Allow scrolling within sidebar */
+        height: 100vh; /* Full viewport height */
+        opacity: 1 !important; /* Ensure it's fully opaque */
     }
-    
+
+    /* Ensure sidebar items are fully opaque */
+    .sidebar * {
+        opacity: 1 !important;
+    }
+
     /* Collapsed sidebar styles */
     .sidebar.collapsed {
         width: 60px;
         overflow-x: hidden;
     }
-    
+
     .sidebar.collapsed .nav-link span {
         display: none;
     }
-    
+
     .sidebar.collapsed .nav-link {
         text-align: center;
         padding: 0.75rem 0;
         justify-content: center;
     }
-    
+
     .sidebar.collapsed .nav-link i {
         margin-right: 0;
         font-size: 1.25rem;
     }
-    
+
+    /* Center the toggle button when sidebar is collapsed */
+    .sidebar.collapsed .sidebar-header {
+        justify-content: center;
+    }
+
+    /* Make toggle button pink when sidebar is collapsed */
+    .sidebar.collapsed .sidebar-toggle-top {
+        background-color: var(--primary-color);
+        color: white !important;
+        border-color: var(--primary-color);
+    }
+
     .sidebar .nav-link {
         font-weight: 500;
         color: var(--text-color);
@@ -182,29 +226,33 @@
         display: flex;
         align-items: center;
         transition: all 0.2s;
+        background-color: var(--surface-color);
+        opacity: 1 !important;
     }
-    
+
     .sidebar .nav-link i {
         color: var(--primary-color);
         margin-right: 0.75rem;
         font-size: 1.1rem;
     }
-    
+
     .sidebar .nav-link.active {
         color: var(--primary-color) !important;
-        background-color: rgba(var(--primary-color-rgb), 0.1);
+        background-color: var(--surface-color);
         font-weight: 600;
+        box-shadow: 0 2px 5px var(--shadow-color);
+        border-left: 3px solid var(--primary-color);
     }
-    
+
     .sidebar .nav-link.active i {
         color: var(--primary-color);
     }
-    
+
     .sidebar .nav-link:hover {
         color: var(--primary-color) !important;
         background-color: rgba(var(--primary-color-rgb), 0.05);
     }
-    
+
     /* Main content area */
     main {
         padding-top: 1.5rem;
@@ -212,41 +260,44 @@
         min-height: 100vh;
         transition: all 0.3s ease;
     }
-    
+
     main.expanded {
         margin-left: 60px !important;
     }
-    
-    /* Toggle button styling */
-    #sidebarToggle {
+
+    /* Sidebar header */
+    .sidebar-header {
+        display: flex;
+        justify-content: flex-end;
+        padding: 10px;
+        margin-bottom: 10px;
         background-color: transparent;
-        color: var(--primary-color);
+    }
+
+    /* Sidebar toggle button */
+    .sidebar-toggle-top {
+        background-color: var(--surface-color);
+        color: var(--primary-color) !important;
         border: 1px solid var(--border-color);
         border-radius: 4px;
-        transition: all 0.2s;
-        padding: 0.25rem 0.5rem;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        opacity: 1; /* Ensure it's fully opaque */
+        box-shadow: 0 1px 3px var(--shadow-color);
     }
-    
-    #sidebarToggle:hover {
-        background-color: rgba(121, 82, 179, 0.1);
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+    .sidebar-toggle-top:hover {
+        background-color: var(--surface-color-hover);
+        color: var(--primary-color) !important;
+        border-color: var(--border-color);
     }
-    
-    #sidebarToggle i {
+
+    .sidebar-toggle-top i {
         font-size: 1.25rem;
-    }
-    
-    /* Sidebar toggle top position */
-    .sidebar-toggle-top {
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        z-index: 1000;
-    }
-    
-    /* Additional space for navigation to prevent overlap */
-    .nav.flex-column {
-        margin-top: 45px !important;
     }
 </style>
 {% endblock %}
@@ -256,11 +307,12 @@
     <div class="row">
         <!-- Sidebar -->
         <div class="col-md-3 col-lg-2 d-md-block sidebar">
-            <div class="position-sticky pt-4">
-                <button id="sidebarToggle" class="btn btn-sm sidebar-toggle-top">
-                    <i class="bi bi-list"></i>
-                </button>
-                
+            <div class="position-sticky">
+                <div class="sidebar-header">
+                    <button id="sidebarToggle" class="sidebar-toggle-top" aria-label="Toggle sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                </div>
                 <ul class="nav flex-column">
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'home' %}">
@@ -294,7 +346,7 @@
                         </a>
                     </li>
                     {% endif %}
-                    
+
                     {% if not user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'login' %}">
@@ -333,7 +385,13 @@
                     {% for item in history %}
                     <a href="{% url 'video-detail' item.video.id %}" class="video-item">
                         <div class="thumbnail-container">
-                            <img src="{{ item.video.thumbnail.url }}" class="video-thumbnail" alt="{{ item.video.title }}">
+                            {% if item.video.thumbnail %}
+                                <img src="{{ item.video.thumbnail.url }}" class="video-thumbnail" alt="{{ item.video.title }}" onerror="this.src='/media/default.jpg'; this.onerror=null;">
+                            {% else %}
+                                <div class="default-thumbnail">
+                                    <i class="bi bi-play-circle"></i>
+                                </div>
+                            {% endif %}
                             <div class="video-duration">{{ item.video.format_duration }}</div>
                         </div>
                         <div class="video-info">
@@ -374,42 +432,37 @@
         const sidebarToggle = document.getElementById('sidebarToggle');
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('main');
-        
+
         // Check if the sidebar is collapsed in localStorage
         const isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-        
+
         // Apply the initial state
         if (isSidebarCollapsed) {
             sidebar.classList.add('collapsed');
             mainContent.classList.add('expanded');
         }
-        
+
         // Update the toggle button icon
         function updateToggleIcon() {
             const icon = sidebarToggle.querySelector('i');
-            if (sidebar.classList.contains('collapsed')) {
-                icon.classList.remove('bi-list');
-                icon.classList.add('bi-arrow-right-square');
-            } else {
-                icon.classList.remove('bi-arrow-right-square');
-                icon.classList.add('bi-list');
-            }
+            // Always use the hamburger menu icon
+            icon.className = 'bi bi-list';
         }
-        
+
         // Initialize the icon
         updateToggleIcon();
-        
+
         // Add click event to toggle the sidebar
         sidebarToggle.addEventListener('click', function() {
             sidebar.classList.toggle('collapsed');
             mainContent.classList.toggle('expanded');
-            
+
             // Save the state to localStorage
             localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-            
+
             // Update the icon
             updateToggleIcon();
         });
     });
 </script>
-{% endblock %} 
+{% endblock %}

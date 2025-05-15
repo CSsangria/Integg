@@ -8,26 +8,49 @@
 {% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-8">
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8 mx-auto">
         <div class="card mb-4">
-            <video class="card-img-top" controls>
-                <source src="{{ video.video_file.url }}" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
+            <div class="video-wrapper">
+                <video id="main-video-player" class="card-img-top" autoplay preload="auto" poster="{% if video.thumbnail %}{{ video.thumbnail.url }}{% endif %}">
+                    <source src="{{ video.video_file.url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="video-controls-wrapper">
+                    <div class="progress-container">
+                        <div class="progress-bar"></div>
+                    </div>
+                    <div class="video-controls">
+                        <button class="control-btn play-pause-btn" data-status="playing">
+                            <i class="bi bi-pause-fill"></i>
+                        </button>
+                        <div class="time-display">
+                            <span class="current-time">0:00</span>
+                            <span class="time-separator">/</span>
+                            <span class="total-time">0:00</span>
+                        </div>
+                        <button class="control-btn mute-btn" data-status="unmuted">
+                            <i class="bi bi-volume-up-fill"></i>
+                        </button>
+                        <button class="control-btn fullscreen-btn">
+                            <i class="bi bi-fullscreen"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
             <div class="card-body">
                 <h1 class="card-title">{{ video.title }}</h1>
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="d-flex align-items-center">
                         <a href="{% url 'user_dashboard' video.author.username %}" class="text-decoration-none">
-                            <img src="{{ video.author.userprofile.profile_picture.url }}" 
+                            <img src="{{ video.author.userprofile.profile_picture.url }}"
                                  alt="{{ video.author.username }}'s profile picture"
                                  class="rounded-circle me-2"
                                  style="width: 48px; height: 48px; object-fit: cover;">
                         </a>
                         <div>
                             <a href="{% url 'user_dashboard' video.author.username %}" class="text-decoration-none">
-                                <strong class="d-block text-dark">{{ video.author.username }}</strong>
+                                <strong class="d-block author-name">{{ video.author.username }}</strong>
                             </a>
                             <span class="text-muted">{{ video.date_posted|date:"F d, Y" }}</span>
                         </div>
@@ -53,12 +76,15 @@
                         {% endif %}
                     </div>
                 </div>
-                <p class="card-text">{{ video.description }}</p>
+                <div class="video-description-container">
+                    <p class="card-text description-text collapsed">{{ video.description }}</p>
+                    <button class="btn btn-sm btn-link toggle-description">Show more</button>
+                </div>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
                 <h5 class="mb-0">Comments</h5>
             </div>
             <div class="card-body">
@@ -70,14 +96,14 @@
                 </form>
                 <hr>
                 {% endif %}
-                
+
                 {% for comment in video.comments.all %}
                     {% if not comment.is_reply %}  {# Only show top-level comments #}
                         <div class="mb-3 comment-container" data-comment-id="{{ comment.pk }}">
                             <div class="d-flex">
                                 <!-- Profile Picture -->
                                 <div class="me-3">
-                                    <img src="{{ comment.author.userprofile.profile_picture.url }}" 
+                                    <img src="{{ comment.author.userprofile.profile_picture.url }}"
                                          alt="{{ comment.author.username }}'s profile picture"
                                          class="rounded-circle"
                                          style="width: 40px; height: 40px; object-fit: cover;">
@@ -102,7 +128,7 @@
                                             <i class="bi bi-reply"></i> Reply
                                         </button>
                                     </div>
-                                    
+
                                     <!-- Reply form (hidden by default) -->
                                     <div class="reply-form mt-2" style="display: none;">
                                         <form class="reply-form-content">
@@ -126,7 +152,7 @@
                                                     <div class="d-flex">
                                                         <!-- Reply Profile Picture -->
                                                         <div class="me-3">
-                                                            <img src="{{ reply.author.userprofile.profile_picture.url }}" 
+                                                            <img src="{{ reply.author.userprofile.profile_picture.url }}"
                                                                  alt="{{ reply.author.username }}'s profile picture"
                                                                  class="rounded-circle"
                                                                  style="width: 32px; height: 32px; object-fit: cover;">
@@ -175,9 +201,476 @@
 </div>
 {% endblock %}
 
+{% block styles %}
+<style>
+    /* Video player styling */
+    .video-wrapper {
+        position: relative;
+        width: 100%;
+        background-color: #000;
+        overflow: hidden;
+    }
+
+    .card-img-top {
+        width: 100%;
+        max-height: 70vh; /* Limit height to 70% of viewport height */
+        object-fit: contain;
+        background-color: #000;
+        display: block;
+        margin: 0 auto;
+    }
+
+    /* Video controls styling */
+    .video-controls-wrapper {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: linear-gradient(transparent, rgba(0,0,0,0.6));
+        transition: opacity 0.3s;
+        opacity: 0;
+    }
+
+    .video-wrapper:hover .video-controls-wrapper {
+        opacity: 1;
+    }
+
+    .progress-container {
+        width: 100%;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+        position: relative;
+        transition: height 0.2s ease;
+    }
+
+    .progress-container:hover {
+        height: 8px;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background-color: var(--primary-color);
+        width: 0%;
+        transition: width 0.1s linear;
+    }
+
+    .video-controls {
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+        justify-content: space-between;
+    }
+
+    .control-btn {
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s;
+    }
+
+    .control-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .time-display {
+        color: white;
+        font-size: 0.9rem;
+        font-family: monospace;
+        margin: 0 15px;
+    }
+
+    /* Make the video container more prominent */
+    .card.mb-4 {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        border-radius: 8px;
+        overflow: hidden;
+        border: none;
+        background-color: var(--surface-color);
+    }
+
+    .card-body {
+        background-color: var(--surface-color);
+        color: var(--text-color);
+    }
+    
+    .card-title {
+        color: var(--text-color);
+    }
+
+    /* Responsive adjustments */
+    @media (min-width: 1200px) {
+        .card-img-top {
+            max-height: 75vh; /* Larger screens can have taller video */
+        }
+    }
+
+    @media (max-width: 768px) {
+        .card-img-top {
+            max-height: 50vh; /* Smaller height on mobile */
+        }
+    }
+
+    /* Description styling */
+    .video-description-container {
+        position: relative;
+        overflow: hidden;
+        padding: 0.5rem 0;
+        margin-top: 0.25rem;
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .description-text {
+        margin-bottom: 0.25rem;
+        white-space: pre-line;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        max-height: 1000px; /* A large value to accommodate any description length */
+        font-size: 0.9rem;
+        color: var(--light-text);
+    }
+
+    .description-text.collapsed {
+        max-height: 2.5rem; /* Approximately 2 lines of text */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    .toggle-description {
+        padding: 0;
+        margin: 0;
+        color: var(--primary-color);
+        font-weight: 400;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: color 0.2s ease;
+        background: none;
+        border: none;
+        text-align: left;
+        opacity: 0.8;
+    }
+
+    .toggle-description:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+        opacity: 1;
+    }
+
+    /* Comment form styling */
+    .card-header {
+        border-bottom: 1px solid var(--border-color);
+        background-color: var(--surface-color) !important;
+        color: var(--text-color);
+    }
+
+    textarea.form-control {
+        border-radius: 8px;
+        resize: none;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        background-color: var(--input-bg);
+        color: var(--text-color);
+        border-color: var(--border-color);
+    }
+
+    textarea.form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb), 0.15);
+        background-color: var(--input-bg-focus);
+    }
+
+    /* Comment styling */
+    .comment-container {
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 1rem;
+    }
+    
+    /* Card body for comments */
+    .card.shadow-sm {
+        background-color: var(--surface-color);
+        color: var(--text-color);
+        border-color: var(--border-color);
+    }
+    
+    .card.shadow-sm .card-body {
+        background-color: var(--surface-color);
+    }
+    
+    /* Comment text color */
+    .comment-container strong, 
+    .reply strong {
+        color: var(--text-color);
+    }
+    
+    .comment-container p, 
+    .reply p {
+        color: var(--light-text);
+    }
+    
+    /* Fix text-muted color */
+    .text-muted {
+        color: var(--light-text) !important;
+    }
+
+    /* Button styling for comments */
+    .btn-outline-primary,
+    .btn-outline-danger,
+    .btn-outline-secondary {
+        border-color: var(--border-color);
+        color: var(--text-color);
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .btn-outline-danger:hover {
+        background-color: var(--danger-color, #dc3545);
+        color: white;
+    }
+    
+    .btn-outline-secondary:hover {
+        background-color: var(--secondary-color, #6c757d);
+        color: white;
+    }
+    
+    /* Primary button */
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+    }
+    
+    /* Fix reply section */
+    .replies-container {
+        border-left: 2px solid var(--border-color);
+    }
+    
+    /* Author name styling */
+    .author-name {
+        color: var(--text-color);
+    }
+</style>
+{% endblock %}
+
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize custom video player
+    const videoPlayer = document.getElementById('main-video-player');
+    const videoContainer = document.querySelector('.video-wrapper');
+    const progressContainer = document.querySelector('.progress-container');
+    const progressBar = progressContainer.querySelector('.progress-bar');
+    const playPauseBtn = document.querySelector('.play-pause-btn');
+    const muteBtn = document.querySelector('.mute-btn');
+    const fullscreenBtn = document.querySelector('.fullscreen-btn');
+    const currentTimeDisplay = document.querySelector('.current-time');
+    const totalTimeDisplay = document.querySelector('.total-time');
+
+    // Format time to MM:SS
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        seconds = Math.floor(seconds % 60);
+        return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    }
+
+    // Initialize player when metadata is loaded
+    videoPlayer.addEventListener('loadedmetadata', function() {
+        // Set total time display
+        totalTimeDisplay.textContent = formatTime(videoPlayer.duration);
+        
+        // Add tooltip for time display on hover
+        const tooltip = document.createElement('div');
+        tooltip.classList.add('progress-tooltip');
+        tooltip.style.display = 'none';
+        progressContainer.appendChild(tooltip);
+        
+        console.log('Video metadata loaded. Duration:', this.duration, 'seconds');
+    });
+
+    // Update progress bar and time display as video plays
+    videoPlayer.addEventListener('timeupdate', function() {
+        // Update progress bar
+        const percentage = (this.currentTime / this.duration) * 100;
+        progressBar.style.width = percentage + '%';
+        
+        // Update current time display
+        currentTimeDisplay.textContent = formatTime(this.currentTime);
+    });
+
+    // Add seeking functionality to progress bar
+    progressContainer.addEventListener('mousemove', function(e) {
+        const rect = this.getBoundingClientRect();
+        const hoverPos = (e.clientX - rect.left) / rect.width;
+        
+        if (videoPlayer.duration) {
+            // Calculate time at hover position
+            const timeAtPosition = hoverPos * videoPlayer.duration;
+            
+            // Find or create tooltip
+            let tooltip = this.querySelector('.progress-tooltip');
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.classList.add('progress-tooltip');
+                this.appendChild(tooltip);
+            }
+            
+            // Format time as MM:SS
+            const formattedTime = formatTime(timeAtPosition);
+            
+            // Position and show tooltip
+            tooltip.textContent = formattedTime;
+            tooltip.style.display = 'block';
+            tooltip.style.left = `${e.clientX - rect.left}px`;
+            tooltip.style.transform = 'translateX(-50%)';
+            tooltip.style.position = 'absolute';
+            tooltip.style.bottom = '15px';
+            tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            tooltip.style.color = 'white';
+            tooltip.style.padding = '2px 6px';
+            tooltip.style.borderRadius = '4px';
+            tooltip.style.fontSize = '12px';
+            tooltip.style.pointerEvents = 'none';
+        }
+    });
+
+    // Hide tooltip when mouse leaves
+    progressContainer.addEventListener('mouseleave', function() {
+        const tooltip = this.querySelector('.progress-tooltip');
+        if (tooltip) tooltip.style.display = 'none';
+    });
+
+    // Add click event to seek video
+    progressContainer.addEventListener('click', function(e) {
+        const rect = this.getBoundingClientRect();
+        const clickPos = (e.clientX - rect.left) / rect.width;
+        
+        // Set video time based on click position
+        if (videoPlayer.duration) {
+            videoPlayer.currentTime = clickPos * videoPlayer.duration;
+        }
+        
+        // Update progress bar immediately
+        progressBar.style.width = (clickPos * 100) + '%';
+        
+        e.stopPropagation();
+    });
+
+    // Play/Pause button functionality
+    playPauseBtn.addEventListener('click', function() {
+        const status = this.dataset.status;
+        
+        if (status === 'playing') {
+            videoPlayer.pause();
+            this.dataset.status = 'paused';
+            this.querySelector('i').className = 'bi bi-play-fill';
+        } else {
+            videoPlayer.play();
+            this.dataset.status = 'playing';
+            this.querySelector('i').className = 'bi bi-pause-fill';
+        }
+    });
+
+    // Video also toggles play/pause on click
+    videoPlayer.addEventListener('click', function() {
+        playPauseBtn.click();
+    });
+
+    // Mute/Unmute button functionality
+    muteBtn.addEventListener('click', function() {
+        const status = this.dataset.status;
+        
+        if (status === 'unmuted') {
+            videoPlayer.muted = true;
+            this.dataset.status = 'muted';
+            this.querySelector('i').className = 'bi bi-volume-mute-fill';
+        } else {
+            videoPlayer.muted = false;
+            this.dataset.status = 'unmuted';
+            this.querySelector('i').className = 'bi bi-volume-up-fill';
+        }
+    });
+
+    // Fullscreen button functionality
+    fullscreenBtn.addEventListener('click', function() {
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+            this.querySelector('i').className = 'bi bi-fullscreen';
+        } else {
+            videoContainer.requestFullscreen();
+            this.querySelector('i').className = 'bi bi-fullscreen-exit';
+        }
+    });
+
+    // Handle video end
+    videoPlayer.addEventListener('ended', function() {
+        playPauseBtn.dataset.status = 'paused';
+        playPauseBtn.querySelector('i').className = 'bi bi-play-fill';
+    });
+
+    // Update playback status if user uses native browser controls
+    videoPlayer.addEventListener('play', function() {
+        playPauseBtn.dataset.status = 'playing';
+        playPauseBtn.querySelector('i').className = 'bi bi-pause-fill';
+    });
+    
+    videoPlayer.addEventListener('pause', function() {
+        playPauseBtn.dataset.status = 'paused';
+        playPauseBtn.querySelector('i').className = 'bi bi-play-fill';
+    });
+
+    // Description toggle functionality
+    const toggleButton = document.querySelector('.toggle-description');
+    const descriptionText = document.querySelector('.description-text');
+    const descriptionContainer = document.querySelector('.video-description-container');
+
+    if (toggleButton && descriptionText && descriptionContainer) {
+        // Check if the description is empty or just whitespace
+        const descriptionContent = descriptionText.textContent.trim();
+        if (!descriptionContent) {
+            // Hide the entire description container if empty
+            descriptionContainer.style.display = 'none';
+        } else {
+            // Check if the description is actually truncated
+            const isDescriptionTruncated = function() {
+                // Temporarily remove the collapsed class to get the full height
+                descriptionText.classList.remove('collapsed');
+                const fullHeight = descriptionText.scrollHeight;
+                // Add the collapsed class back
+                descriptionText.classList.add('collapsed');
+                // Get the truncated height
+                const truncatedHeight = descriptionText.scrollHeight;
+
+                // If the heights are the same, the text isn't being truncated
+                return fullHeight > truncatedHeight;
+            };
+
+            // Only show the toggle button if the description is actually truncated
+            if (!isDescriptionTruncated()) {
+                toggleButton.style.display = 'none';
+            }
+
+            toggleButton.addEventListener('click', function() {
+                descriptionText.classList.toggle('collapsed');
+                this.textContent = descriptionText.classList.contains('collapsed') ? 'Show more' : 'Show less';
+            });
+        }
+    }
     // Video like functionality
     const likeButtons = document.querySelectorAll('.like-button');
     likeButtons.forEach(button => {
@@ -193,7 +686,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 const heartIcon = this.querySelector('i');
                 const likeCount = this.querySelector('.like-count');
-                
+
                 if (data.liked) {
                     heartIcon.classList.remove('bi-heart');
                     heartIcon.classList.add('bi-heart-fill');
@@ -201,7 +694,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     heartIcon.classList.remove('bi-heart-fill');
                     heartIcon.classList.add('bi-heart');
                 }
-                
+
                 likeCount.textContent = data.total_likes;
             })
             .catch(error => console.error('Error:', error));
@@ -222,7 +715,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 const bookmarkIcon = this.querySelector('i');
-                
+
                 if (data.saved) {
                     bookmarkIcon.classList.remove('bi-bookmark');
                     bookmarkIcon.classList.add('bi-bookmark-fill');
@@ -250,7 +743,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 const thumbIcon = this.querySelector('i');
                 const likeCount = this.querySelector('.like-count');
-                
+
                 if (data.liked) {
                     thumbIcon.classList.remove('bi-hand-thumbs-up');
                     thumbIcon.classList.add('bi-hand-thumbs-up-fill');
@@ -258,7 +751,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     thumbIcon.classList.remove('bi-hand-thumbs-up-fill');
                     thumbIcon.classList.add('bi-hand-thumbs-up');
                 }
-                
+
                 likeCount.textContent = data.likes;
             });
         });
@@ -279,7 +772,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 const thumbIcon = this.querySelector('i');
                 const dislikeCount = this.querySelector('.dislike-count');
-                
+
                 if (data.disliked) {
                     thumbIcon.classList.remove('bi-hand-thumbs-down');
                     thumbIcon.classList.add('bi-hand-thumbs-down-fill');
@@ -287,7 +780,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     thumbIcon.classList.remove('bi-hand-thumbs-down-fill');
                     thumbIcon.classList.add('bi-hand-thumbs-down');
                 }
-                
+
                 dislikeCount.textContent = data.dislikes;
             });
         });
@@ -319,7 +812,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             const commentId = this.querySelector('[name="parent_id"]').value;
             const content = this.querySelector('[name="content"]').value;
-            
+
             fetch(`/comment/${commentId}/reply/`, {
                 method: 'POST',
                 headers: {
@@ -335,14 +828,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.success) {
                     // Hide the reply form
                     this.closest('.reply-form').style.display = 'none';
-                    
+
                     // Create the reply element
                     const replyHtml = `
                         <div class="reply ms-4 mt-2">
                             <div class="d-flex">
                                 <!-- Reply Profile Picture -->
                                 <div class="me-3">
-                                    <img src="${data.reply.author_profile_picture}" 
+                                    <img src="${data.reply.author_profile_picture}"
                                          alt="${data.reply.author}'s profile picture"
                                          class="rounded-circle"
                                          style="width: 32px; height: 32px; object-fit: cover;">
@@ -368,14 +861,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                         </div>
                     `;
-                    
+
                     // Insert the reply in the replies container
                     const repliesContainer = this.closest('.comment-container').querySelector('.replies-container');
                     repliesContainer.insertAdjacentHTML('beforeend', replyHtml);
-                    
+
                     // Clear the textarea
                     this.querySelector('[name="content"]').value = '';
-                    
+
                     // Add event listeners to the new like/dislike buttons
                     const newReply = repliesContainer.querySelector(`.reply:last-child`);
                     setupCommentButtons(newReply);
@@ -394,7 +887,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function setupCommentButtons(commentElement) {
         const likeButton = commentElement.querySelector('.like-comment');
         const dislikeButton = commentElement.querySelector('.dislike-comment');
-        
+
         if (likeButton) {
             likeButton.addEventListener('click', function() {
                 const commentId = this.dataset.commentId;
@@ -408,7 +901,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(data => {
                     const thumbIcon = this.querySelector('i');
                     const likeCount = this.querySelector('.like-count');
-                    
+
                     if (data.liked) {
                         thumbIcon.classList.remove('bi-hand-thumbs-up');
                         thumbIcon.classList.add('bi-hand-thumbs-up-fill');
@@ -416,12 +909,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         thumbIcon.classList.remove('bi-hand-thumbs-up-fill');
                         thumbIcon.classList.add('bi-hand-thumbs-up');
                     }
-                    
+
                     likeCount.textContent = data.likes;
                 });
             });
         }
-        
+
         if (dislikeButton) {
             dislikeButton.addEventListener('click', function() {
                 const commentId = this.dataset.commentId;
@@ -435,7 +928,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(data => {
                     const thumbIcon = this.querySelector('i');
                     const dislikeCount = this.querySelector('.dislike-count');
-                    
+
                     if (data.disliked) {
                         thumbIcon.classList.remove('bi-hand-thumbs-down');
                         thumbIcon.classList.add('bi-hand-thumbs-down-fill');
@@ -443,7 +936,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         thumbIcon.classList.remove('bi-hand-thumbs-down-fill');
                         thumbIcon.classList.add('bi-hand-thumbs-down');
                     }
-                    
+
                     dislikeCount.textContent = data.dislikes;
                 });
             });
@@ -461,15 +954,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const commentId = this.dataset.commentId;
             const repliesContainer = this.closest('.replies-container');
             const hiddenReplies = repliesContainer.querySelectorAll('.reply.d-none');
-            
+
             hiddenReplies.forEach(reply => {
                 reply.classList.remove('d-none');
             });
-            
+
             // Hide the "Show more" button
             this.style.display = 'none';
         });
     });
 });
 </script>
-{% endblock %} 
+{% endblock %}

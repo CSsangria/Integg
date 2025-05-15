@@ -107,13 +107,19 @@
                 
                 <div class="mb-3">
                     <h6 class="themed-title">Reason for Appeal</h6>
-                    <div class="p-3 rounded bg-light-highlight">{{ appeal.reason }}</div>
+                    <div class="p-3 rounded bg-light-highlight">
+                        {% if appeal.reason_category %}
+                            {{ appeal.reason_category }}
+                        {% else %}
+                            {{ appeal.reason }}
+                        {% endif %}
+                    </div>
                 </div>
                 
-                {% if appeal.description %}
+                {% if appeal.explanation %}
                 <div class="mb-3">
                     <h6 class="themed-title">Detailed Explanation</h6>
-                    <div class="p-3 rounded bg-light-highlight">{{ appeal.description }}</div>
+                    <div class="p-3 rounded bg-light-highlight">{{ appeal.explanation }}</div>
                 </div>
                 {% endif %}
                 

@@ -29,12 +29,22 @@ def profile(request):
 
 @login_required
 def settings(request):
-    profile_form = UserProfileUpdateForm(instance=request.user.userprofile)
+    # Check if user has a userprofile, create one if not
+    try:
+        profile = request.user.userprofile
+    except User.userprofile.RelatedObjectDoesNotExist:
+        from users.models import UserProfile
+        profile = UserProfile.objects.create(
+            user=request.user,
+            profile_picture='profile_pics/newuser.jpg'
+        )
+    
+    profile_form = UserProfileUpdateForm(instance=profile)
     password_form = CustomPasswordChangeForm(request.user)
     
     if request.method == 'POST':
         if 'profile_submit' in request.POST:
-            profile_form = UserProfileUpdateForm(request.POST, request.FILES, instance=request.user.userprofile)
+            profile_form = UserProfileUpdateForm(request.POST, request.FILES, instance=profile)
             if profile_form.is_valid():
                 profile_form.save()
                 messages.success(request, 'Your profile has been updated!')
@@ -42,10 +52,9 @@ def settings(request):
         
         elif 'theme_submit' in request.POST:
             # Handle theme update separately to avoid requiring profile picture upload again
-            userprofile = request.user.userprofile
-            userprofile.dark_mode = 'dark_mode' in request.POST and request.POST.get('dark_mode') == 'on'
-            userprofile.theme = request.POST.get('theme', 'default')
-            userprofile.save()
+            profile.dark_mode = 'dark_mode' in request.POST and request.POST.get('dark_mode') == 'on'
+            profile.theme = request.POST.get('theme', 'default')
+            profile.save()
             messages.success(request, 'Your theme settings have been updated!')
             return redirect('settings')
         
@@ -62,7 +71,7 @@ def settings(request):
     context = {
         'profile_form': profile_form,
         'password_form': password_form,
-        'profile': request.user.userprofile
+        'profile': profile
     }
     return render(request, 'users/settings.html', context)
 
@@ -71,6 +80,17 @@ class CustomLoginView(LoginView):
     
     def form_valid(self, form):
         user = form.get_user()
+        
+        # Check if user has a userprofile, create one if not
+        try:
+            _ = user.userprofile
+        except User.userprofile.RelatedObjectDoesNotExist:
+            from users.models import UserProfile
+            UserProfile.objects.create(
+                user=user,
+                profile_picture='profile_pics/newuser.jpg'
+            )
+            
         if not user.is_active:
             # Store user info in session for the appeal process without logging in
             self.request.session['suspended_user_id'] = user.id
@@ -131,18 +151,28 @@ def submit_appeal(request):
     ).order_by('-created_at').first()
     
     if request.method == 'POST':
-        form = AccountAppealForm(request.POST)
-        if form.is_valid():
-            appeal = form.save(commit=False)
-            appeal.user = user
+        # Check if we're using the built-in form fields from the template
+        if 'reason' in request.POST and 'description' in request.POST:
+            # Create an appeal object from the form data
+            reason = request.POST.get('reason')
+            description = request.POST.get('description')
+            
+            # Combine reason and description into the reason field
+            full_reason = f"{reason}: {description}"
+            
+            appeal = AccountAppeal(
+                user=user,
+                reason=full_reason,
+                status='pending'
+            )
             appeal.save()
-            messages.success(request, 'Your appeal has been submitted. We will review it shortly.')
             
             # Clear the session data
             if 'suspended_user_id' in request.session:
                 del request.session['suspended_user_id']
                 
-            return redirect('login')
+            # Render the appeal submitted template directly instead of redirecting
+            return render(request, 'users/appeal_submitted.html')
     else:
         form = AccountAppealForm()
     
@@ -159,6 +189,12 @@ def submit_appeal(request):
         'recent_suspension': recent_suspension
     }
     return render(request, 'users/submit_appeal.html', context)
+
+def appeal_submitted(request):
+    """
+    View for showing the appeal submission confirmation page.
+    """
+    return render(request, 'users/appeal_submitted.html')
 
 @login_required
 @user_passes_test(lambda u: u.is_staff)
@@ -355,6 +391,17 @@ def handle_report(request, pk):
 @user_passes_test(lambda u: u.is_staff)
 def admin_appeals(request):
     appeals = AccountAppeal.objects.all().order_by('-created_at')
+    
+    # Process appeals to split the reason field where needed
+    for appeal in appeals:
+        # Check if the reason contains a colon (indicating it has both reason and explanation)
+        if ":" in appeal.reason and not appeal.reason.startswith("SYSTEM:"):
+            parts = appeal.reason.split(":", 1)
+            appeal.reason_category = parts[0].strip()
+            appeal.explanation = parts[1].strip()
+        else:
+            appeal.reason_category = ""
+            appeal.explanation = ""
     
     # Calculate counts for the dashboard
     pending_count = AccountAppeal.objects.filter(status='pending').count()

@@ -27,7 +27,7 @@
                     <p>To appeal this decision, please explain why your account should be reactivated below.</p>
                 </div>
                 
-                <form method="post">
+                <form method="post" id="appealForm">
                     {% csrf_token %}
                     <div class="mb-3">
                         <label for="reason" class="form-label" style="color: #5a3d99; font-weight: 500;">Reason for Appeal:</label>
@@ -82,3 +82,12 @@
     </div>
 </div>
 {% endblock %} 
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // We don't need JavaScript for form submission anymore since we're using server-side redirect
+    // The form will naturally submit to the backend which will redirect to the confirmation page
+});
+</script>
+{% endblock %}

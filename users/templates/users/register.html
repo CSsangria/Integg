@@ -3,9 +3,50 @@
 
 {% block title %}Register - PiliPili{% endblock %}
 
+{% block styles %}
+<style>
+    /* Compact auth form styles */
+    .auth-container .card {
+        margin-top: 1rem;
+    }
+
+    .auth-container .card-body {
+        padding: 1rem 1.25rem;
+    }
+
+    .auth-container .form-group {
+        margin-bottom: 0.75rem;
+    }
+
+    .auth-container label {
+        margin-bottom: 0.25rem;
+    }
+
+    .auth-container .mt-3 {
+        margin-top: 0.75rem !important;
+    }
+
+    .auth-container .asteriskField {
+        display: none;
+    }
+
+    /* Reduce help text spacing */
+    .auth-container small.text-muted {
+        margin-top: 0.1rem;
+        display: block;
+        line-height: 1.2;
+    }
+
+    .auth-container .alert {
+        padding: 0.5rem 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-6">
+    <div class="col-md-6 auth-container">
         <div class="card">
             <div class="card-header">
                 <h2 class="mb-0">Register</h2>
@@ -25,4 +66,4 @@
         </div>
     </div>
 </div>
-{% endblock %} 
+{% endblock %}
